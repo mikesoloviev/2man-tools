@@ -73,6 +73,7 @@ namespace X2MANTools
             InsertBefore(Path.Combine(sourceDirectory, "index.html"), "</head>", Templates.MatIcons);
             InsertBefore(Path.Combine(appDirectory, "app.module.ts"), "@NgModule", Templates.MatImports);
             InsertAfter(Path.Combine(appDirectory, "app.module.ts"), "imports: [", Templates.MatModules);
+            Replace(Path.Combine(clientDirectory, ".angular-cli.json"), "\"../node_modules/bootstrap/dist/css/bootstrap.min.css\"", "");
         }
 
         static void Migrate(string projectDirectory)
