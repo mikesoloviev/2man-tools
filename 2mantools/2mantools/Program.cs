@@ -78,7 +78,7 @@ namespace X2MANTools
         static void Migrate(string projectDirectory)
         {
             Message("Info", "Migrating - Modifying Database");
-            var settingsConnection = Modify(projectDirectory, "appsettings.Development.json");
+            var settingsConnection = Modify(projectDirectory, "appsettings.Development.json", "migrate.sql");
             if (string.IsNullOrEmpty(settingsConnection)) { return; }
             Message("Info", "Migrating - Scaffolding Database");
             var outFolder = "Models/Data";
@@ -91,10 +91,10 @@ namespace X2MANTools
         static void Deploy(string projectDirectory)
         {
             Message("Info", "Deploying - Modifying Database");
-            Modify(projectDirectory, "appsettings.json");
+            Modify(projectDirectory, "appsettings.json", "deploy.sql");
         }
 
-        static string Modify(string projectDirectory, string settingsFile)
+        static string Modify(string projectDirectory, string settingsFile, string migrationFile)
         {
             var settingsConnection = GetSettingsConnection(Path.Combine(projectDirectory, settingsFile));
             if (string.IsNullOrEmpty(settingsConnection))
@@ -108,7 +108,14 @@ namespace X2MANTools
                 Message("Error", "Failed to parse the database connection string");
                 return null;
             }
-            RunShell("mysqlsh", $"{shellConnection} --sql --file=migrate.sql", projectDirectory);
+            if (File.Exists(migrationFile))
+            {
+                RunShell("mysqlsh", $"{shellConnection} --sql --file={migrationFile}", projectDirectory);
+            }
+            else
+            {
+                Message("Warning", $"The migration file {migrationFile} not found");
+            }
             return settingsConnection;
         }
 
@@ -128,14 +135,12 @@ namespace X2MANTools
             }
         }
 
-        static string MakeShellConnection(string inConnection)
+        static string MakeShellConnection(string connection)
         {
             try
             {
-                var fields = inConnection.Split(';').Select(x => x.Split('=')).ToDictionary(x => x.First().Trim().ToLower(), x => x.Last().Trim());
-                var outConnection = $"--host={fields["server"]} --user={fields["user"]} --password={fields["password"]}";
-                if (fields.ContainsKey("port")) outConnection += $" --port={fields["port"]}";
-                return outConnection;
+                var fields = connection.Split(';').Select(x => x.Split('=')).ToDictionary(x => x.First().Trim().ToLower(), x => x.Last().Trim());
+                return $"--host={fields["server"]} --user={fields["user"]} --password={fields["password"]}" + (fields.ContainsKey("port") ? $" --port={fields["port"]}" : "");
             }
             catch
             {
