@@ -3,7 +3,9 @@ using System.Linq;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,22 +14,42 @@ namespace X2MANTools
 {
     class Program
     {
+
+        static string projectDirectory = "";
+        static string clientDirectory = "";
+        static string sourceDirectory = "";
+        static string appDirectory = "";
+
         static void Main(string[] args)
         {
+            projectDirectory = Environment.CurrentDirectory;
+            clientDirectory = Path.Combine(projectDirectory, "ClientApp");
+            sourceDirectory = Path.Combine(clientDirectory, "src");
+            appDirectory = Path.Combine(sourceDirectory, "app");
+
             if (!args.Any())
             {
                 Usage();
+                return;
             }
-            else
+            foreach (var arg in args)
             {
-                var projectDirectory = Environment.CurrentDirectory;
-                switch (args.First())
+                switch (arg.TrimStart('-'))
                 {
-                    case "-upgrade":
+                    case "upgrade":
                         Upgrade(projectDirectory);
                         break;
+                    case "migrate":
+                        Migrate(projectDirectory);
+                        break;
+                    case "deploy":
+                        Deploy(projectDirectory);
+                        break;
+                    case "example":
+                        Example(projectDirectory);
+                        break;
                     default:
-                        Usage();
+                        Message("Error", $"Invalid argument: {arg}");
                         break;
                 }
             }
@@ -35,12 +57,9 @@ namespace X2MANTools
 
         static void Upgrade(string projectDirectory)
         {
-            var clientDirectory = Path.Combine(projectDirectory, "ClientApp");
-            var sourceDirectory = Path.Combine(clientDirectory, "src");
-            var appDirectory = Path.Combine(sourceDirectory, "app");
             // MySQL Libraries
             Message("Info", "Upgrading - MySQL Libraries");
-            RunShell("dotnet", "add package Microsoft.EntityFrameworkCore.Tools -v 2.1.0-preview1-final", projectDirectory);
+            RunShell("dotnet", "add package Microsoft.EntityFrameworkCore.Tools -v 2.1.0-preview2-final", projectDirectory);
             RunShell("dotnet", "add package Pomelo.EntityFrameworkCore.MySql", projectDirectory);
             // Angular Material Libraries
             Message("Info", "Upgrading - Angular Material Libraries");
@@ -49,13 +68,86 @@ namespace X2MANTools
             RunShell("npm", "install --save hammerjs", clientDirectory);
             // Angular Material File Templates
             Message("Info", "Upgrading - Angular Material File Templates");
-            Append(Path.Combine(sourceDirectory, "styles.css"), "@import '~@angular/material/prebuilt-themes/indigo-pink.css';");
-            Append(Path.Combine(sourceDirectory, "main.ts"), "import 'hammerjs';");
-            InsertBefore(Path.Combine(sourceDirectory, "index.html"), "</head>", "  <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>");
-            InsertBefore(Path.Combine(appDirectory, "app.module.ts"), "@NgModule", MatImports);
-            InsertAfter(Path.Combine(appDirectory, "app.module.ts"), "imports: [", MatModules);
-            Create(Path.Combine(appDirectory, "app.component.html"), AppHtml);
-            Create(Path.Combine(appDirectory, "app.component.css"), AppCss);
+            Append(Path.Combine(sourceDirectory, "styles.css"), Templates.MatTheme);
+            Append(Path.Combine(sourceDirectory, "main.ts"), Templates.MatHammer);
+            InsertBefore(Path.Combine(sourceDirectory, "index.html"), "</head>", Templates.MatIcons);
+            InsertBefore(Path.Combine(appDirectory, "app.module.ts"), "@NgModule", Templates.MatImports);
+            InsertAfter(Path.Combine(appDirectory, "app.module.ts"), "imports: [", Templates.MatModules);
+        }
+
+        static void Migrate(string projectDirectory)
+        {
+            Message("Info", "Migrating - Modifying Database");
+            var settingsConnection = Modify(projectDirectory, "appsettings.Development.json");
+            if (string.IsNullOrEmpty(settingsConnection)) { return; }
+            Message("Info", "Migrating - Scaffolding Database");
+            var outFolder = "Models/Data";
+            if (!Directory.Exists(outFolder)) { Directory.CreateDirectory(outFolder); }
+            RunShell("dotnet", $"ef dbcontext scaffold \"{settingsConnection}\" Pomelo.EntityFrameworkCore.MySql -o \"{outFolder}\" -c DataStore -f", projectDirectory);
+            Replace(Path.Combine(outFolder, "DataStore.cs"), "protected override void OnConfiguring", "void _OnConfiguring");
+            Replace(Path.Combine(outFolder, "DataStore.cs"), "#warning", "                // #warning");
+        }
+
+        static void Deploy(string projectDirectory)
+        {
+            Message("Info", "Deploying - Modifying Database");
+            Modify(projectDirectory, "appsettings.json");
+        }
+
+        static string Modify(string projectDirectory, string settingsFile)
+        {
+            var settingsConnection = GetSettingsConnection(Path.Combine(projectDirectory, settingsFile));
+            if (string.IsNullOrEmpty(settingsConnection))
+            {
+                Message("Error", "Failed to get the database connection string from settings");
+                return null;
+            }
+            var shellConnection = MakeShellConnection(settingsConnection);
+            if (string.IsNullOrEmpty(shellConnection))
+            {
+                Message("Error", "Failed to parse the database connection string");
+                return null;
+            }
+            RunShell("mysqlsh", $"{shellConnection} --sql --file=migrate.sql", projectDirectory);
+            return settingsConnection;
+        }
+
+        // "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=mywebapp;" }
+        // --host=localhost --port=3306 --user=root --password=mapleace --sql --file=migrate.sql
+
+        static string GetSettingsConnection(string path)
+        {
+            try
+            {
+                var settings = JObject.Parse(File.ReadAllText(path));
+                return (string)settings["ConnectionStrings"]["DataStore"];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static string MakeShellConnection(string inConnection)
+        {
+            try
+            {
+                var fields = inConnection.Split(';').Select(x => x.Split('=')).ToDictionary(x => x.First().Trim().ToLower(), x => x.Last().Trim());
+                var outConnection = $"--host={fields["server"]} --user={fields["user"]} --password={fields["password"]}";
+                if (fields.ContainsKey("port")) outConnection += $" --port={fields["port"]}";
+                return outConnection;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static void Example(string projectDirectory)
+        {
+            Message("Info", "Example - File Templates");
+            Create(Path.Combine(appDirectory, "app.component.html"), Templates.AppHtml);
+            Create(Path.Combine(appDirectory, "app.component.css"), Templates.AppCss);
         }
 
         static void RunShell(string command, string arguments, string workingDirectory)
@@ -85,14 +177,14 @@ namespace X2MANTools
 
         static void Append(string path, string content)
         {
-            var text = File.ReadAllText(path) + Environment.NewLine + content;
+            var text = File.ReadAllText(path) + content;
             File.WriteAllText(path, text);
         }
 
         static void InsertBefore(string path, string label, string content)
         {
             var text = File.ReadAllText(path);
-            content = Environment.NewLine + content + Environment.NewLine + label;
+            content = content + label;
             text = text.Replace(label, content);
             File.WriteAllText(path, text);
         }
@@ -100,7 +192,14 @@ namespace X2MANTools
         static void InsertAfter(string path, string label, string content)
         {
             var text = File.ReadAllText(path);
-            content = label + Environment.NewLine + content + Environment.NewLine;
+            content = label + content;
+            text = text.Replace(label, content);
+            File.WriteAllText(path, text);
+        }
+
+        static void Replace(string path, string label, string content)
+        {
+            var text = File.ReadAllText(path);
             text = text.Replace(label, content);
             File.WriteAllText(path, text);
         }
@@ -112,127 +211,9 @@ namespace X2MANTools
 
         static void Usage()
         {
-            Console.WriteLine(UsageInfo);
+            Console.WriteLine(Templates.UsageInfo);
             Thread.Sleep(20000);
         }
 
-        #region Templates
-
-        static string MatImports =
-@"
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {
-  MatAutocompleteModule,
-  MatButtonModule,
-  MatButtonToggleModule,
-  MatCardModule,
-  MatCheckboxModule,
-  MatChipsModule,
-  MatDatepickerModule,
-  MatDialogModule,
-  MatDividerModule,
-  MatExpansionModule,
-  MatGridListModule,
-  MatIconModule,
-  MatInputModule,
-  MatListModule,
-  MatMenuModule,
-  MatNativeDateModule,
-  MatPaginatorModule,
-  MatProgressBarModule,
-  MatProgressSpinnerModule,
-  MatRadioModule,
-  MatRippleModule,
-  MatSelectModule,
-  MatSidenavModule,
-  MatSliderModule,
-  MatSlideToggleModule,
-  MatSnackBarModule,
-  MatSortModule,
-  MatStepperModule,
-  MatTableModule,
-  MatTabsModule,
-  MatToolbarModule,
-  MatTooltipModule
-} from '@angular/material';
-";
-
-        static string MatModules =
-@"
-    BrowserAnimationsModule,
-    MatAutocompleteModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatDatepickerModule,
-    MatDialogModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatGridListModule,
-    MatIconModule,
-    MatInputModule,
-    MatListModule,
-    MatMenuModule,
-    MatNativeDateModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatRadioModule,
-    MatRippleModule,
-    MatSelectModule,
-    MatSidenavModule,
-    MatSliderModule,
-    MatSlideToggleModule,
-    MatSnackBarModule,
-    MatSortModule,
-    MatStepperModule,
-    MatTableModule,
-    MatTabsModule,
-    MatToolbarModule,
-    MatTooltipModule,
-";
-
-        static string AppHtml =
-@"
-<mat-sidenav-container class='main-sidenav-container'>
-  <mat-sidenav mode='side' opened class='main-sidenav'>
-    <mat-nav-list>
-      <a mat-list-item routerLink='/'>Home</a>
-      <a mat-list-item routerLink='/fetch-data'>Fetch data</a>
-      <a mat-list-item routerLink='/counter'>Counter</a>
-    </mat-nav-list>
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
-";
-
-        static string AppCss =
-@"
-.main-sidenav-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-.main-sidenav {
-  width: 300px;
-}
-";
-
-        static string UsageInfo =
-@"
-USAGE:
-  2mantols -<option>
-OPTIONS:
-  2mantols -upgrade
-    Upgrade the ASP.NET Core Angular project to 2MAN
-";
-        #endregion
     }
 }
