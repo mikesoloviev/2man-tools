@@ -25,32 +25,38 @@ namespace X2MANTools {
         }
 
         public void Apply(string template) {
-            Fill();
-            if (!Load(template)) return;
+            DefineVars();
+            if (!LoadTemplate(template)) return;
             var skipNext = false;
             var i = 0;
             while (i < lines.Count()) {
                 var line = lines[i];
-                if (line.StartsWith(">>")) {
+                if (line.StartsWith("<<")) {
+                    new TemplateEngine(projectDirectory, templateDirectory).Apply(line.TrimStart('<').Trim());
+                }
+                else if (line.StartsWith(">>")) {
                     if (skipNext) {
                         skipNext = false;
                     }
                     else {
                         try {
                             var fields = ParseCommand(line);
+                            var count = fields.Count();
                             switch (fields[0]) {
                                 case "print":
                                     Print(fields[1], fields[2]); break;
                                 case "run":
                                     Run(fields[1], fields[2], fields[3]); break;
-                                case "make-folder":
-                                    MakeFolder(fields[1], fields[2]); break;
+                                case "create-folder":
+                                    CreateFolder(fields[1], fields[2]); break;
+                                case "remove-folder":
+                                    RemoveFolder(fields[1], fields[2]); break;
+                                case "remove-file":
+                                    RemoveFile(fields[1], fields[2]); break;
                                 case "edit-create":
                                     EditCreate(fields[1], fields[2], GetContent(ref i)); break;
                                 case "edit-append":
                                     EditAppend(fields[1], fields[2], GetContent(ref i)); break;
-                                case "edit-prepend-json":
-                                    EditPrependJson(fields[1], fields[2], GetContent(ref i)); break;
                                 case "edit-replace":
                                     EditReplace(fields[1], fields[2], fields[3], GetContent(ref i)); break;
                                 case "edit-insert-before":
@@ -62,9 +68,9 @@ namespace X2MANTools {
                                 case "edit-comment":
                                     EditComment(fields[1], fields[2], fields[3]); break;
                                 case "guard-next":
-                                    skipNext = !Guard(fields[1], fields[2], fields[3], fields[4]); break;
+                                    skipNext = !Guard(fields[1], fields[2], fields[3], fields[count - 2], fields[count - 1]); break;
                                 case "guard-rest":
-                                    if (!Guard(fields[1], fields[2], fields[3], fields[4])) return; else break;
+                                    if (!Guard(fields[1], fields[2], fields[3], fields[count - 2], fields[count - 1])) return; else break;
                             }
                         }
                         catch (Exception e) {
@@ -77,10 +83,12 @@ namespace X2MANTools {
             }
         }
 
-        void Fill() {
+        void DefineVars() {
             vars = new Dictionary<string, string>();
 
-            vars["$project-name"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last(); // TODO: get from *.csproj -> <RootNamespace>MyWebApp</RootNamespace>
+            // NOTE: more correct way is to get the default project namespace from *.csproj (<RootNamespace>MyWebApp</RootNamespace>),
+            // however currently the NET Core scaffolding get it from the the project file/folder name like this:
+            vars["$project-name"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last(); 
             vars["$database-name"] = vars["$project-name"].Replace("-", "").Replace("_", "").Replace(" ", "").ToLower();
 
             vars["$project-folder"] = projectDirectory;
@@ -94,7 +102,7 @@ namespace X2MANTools {
             vars["$shell-connection-pub"] = MakeShellConnection(vars["$config-connection-pub"]) ?? "";
         }
 
-        bool Load(string template) {
+        bool LoadTemplate(string template) {
             var path = Path.Combine(templateDirectory, template + templateExtension);
             if (File.Exists(path)) {
                 lines = new List<string>();
@@ -109,13 +117,16 @@ namespace X2MANTools {
             }
         }
 
-        bool Guard(string predicate, string value, string messageType, string messageContent) {
+        bool Guard(string predicate, string value1, string value2, string messageType, string messageContent) {
             var success = false;
             switch (predicate) {
                 case "defined-var":
-                    success = vars.ContainsKey($"${value}") && !string.IsNullOrEmpty(vars[$"${value}"]); break;
+                    var varName = "$" + value1;
+                    success = vars.ContainsKey(varName) && !string.IsNullOrEmpty(vars[varName]); 
+                    break;
                 case "exist-file":
-                    success = File.Exists(value); break;
+                    success = File.Exists(Path.Combine(value1, value2)); 
+                    break;
             }
             if (!success) {
                 Print(messageType, messageContent);
@@ -139,10 +150,26 @@ namespace X2MANTools {
             }
         }
 
-        void MakeFolder(string parent, string folder) {
+        void CreateFolder(string parent, string folder) {
             var path = Path.Combine(parent, folder);
             if (!Directory.Exists(path)) {
                 Directory.CreateDirectory(path);
+            }
+        }
+
+       void RemoveFolder(string parent, string folder) {
+           try {
+                Directory.Delete(Path.Combine(parent, folder), true);
+            }
+            catch {
+            }
+        }
+
+       void RemoveFile(string parent, string folder) {
+           try {
+                File.Delete(Path.Combine(parent, folder);
+            }
+            catch {
             }
         }
 
@@ -156,27 +183,27 @@ namespace X2MANTools {
             File.WriteAllText(path, text);
         }
 
-        void EditPrependJson(string folder, string file, string content) {
-            var path = Path.Combine(folder, file);
-            var text = File.ReadAllText(path);
-            text = "{" + content + text.TrimStart('{');
-            File.WriteAllText(path, text);
-        }
-
         void EditInsertBefore(string folder, string file, string label, string content) {
-            var path = Path.Combine(folder, file);
-            var text = File.ReadAllText(path);
-            content = content + label;
-            text = text.Replace(label, content);
-            File.WriteAllText(path, text);
+            EditInsert(folder, file, label, content, false);
         }
 
         void EditInsertAfter(string folder, string file, string label, string content) {
+            EditInsert(folder, file, label, content, true);
+        }
+
+        void EditInsert(string folder, string file, string label, string content, bool after) {
             var path = Path.Combine(folder, file);
             var text = File.ReadAllText(path);
-            content = label + content;
-            text = text.Replace(label, content);
-            File.WriteAllText(path, text);
+            var index = text.indexOf(label);
+            var length = after ? label.Length : 0;
+            if (index >= 0) {
+                try {
+                    text = text.Substring(0, index + length) + content + text.Substring(index + length);
+                    File.WriteAllText(path, text);
+                }
+                catch {
+                }
+            }
         }
 
         void EditReplace(string folder, string file, string label, string content) {

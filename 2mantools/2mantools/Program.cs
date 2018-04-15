@@ -11,13 +11,14 @@ namespace X2MANTools {
 @"
 USAGE:
   2mantols -a <template> -p <project-folder> -t <template-folder>
+TEMPLATE:
+  The file located in the template folder. The file name only, the extension must be .txt.
 PROJECT-FOLDER:
   Optional. The default value is the folder from where 2mantools.exe is executed.
 TEMPLATE-FOLDER:
   Optional. The default value is the folder where 2mantools.exe is located.
-TEMPLATES:
-  upgrade
-    Upgrade the ASP.NET Core Angular project to 2MAN.
+USAGE EXAMPLE:
+  2mantools -a upgrade
 ";
 
         static void Main(string[] args) {
