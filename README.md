@@ -1,3 +1,3 @@
-# 2man-tools
+# 2MAN Tools
 
 ## Tools to setup a 2MAN Stack project
