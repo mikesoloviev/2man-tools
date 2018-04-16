@@ -1,3 +1,4 @@
 ﻿(: apply | upgrade :)
-(: apply | signup :)
+(: apply | seed :)
 (: apply | migrate :)
+(: apply | welcome :)

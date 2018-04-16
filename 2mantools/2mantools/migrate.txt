@@ -11,16 +11,3 @@ void _OnConfiguring
 (: edit-replace | $project-folder/Models/Data | DataStore.cs | #warning |
 // #warning
 :)
-(: edit-create | $project-folder/Models/Data | DataStore.Extension.cs |
-using Microsoft.EntityFrameworkCore;
-
-namespace $project-name.Models.Data {
-
-    public partial class DataStore {
-
-        public DataStore(DbContextOptions<DataStore> options) : base(options) {
-        }
-
-    }
-}
-:)
