@@ -60,7 +60,7 @@
     <Content Include="migrate.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="register.txt">
+    <Content Include="signup.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="deploy.txt">
