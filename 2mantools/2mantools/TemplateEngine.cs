@@ -31,7 +31,7 @@ namespace X2MANTools {
             var i = 0;
             while (i < lines.Count()) {
                 var line = lines[i];
-                if (line.StartsWith(">>")) {
+                if (line.StartsWith("(:")) {
                     if (skipNext) {
                         skipNext = false;
                     }
@@ -226,19 +226,11 @@ namespace X2MANTools {
             var content = new List<string>();
             for (var i = index; i < lines.Count; i++) {
                 index = i;
-                if (lines[i].StartsWith(">>")) {
+                if (lines[i].StartsWith("(:")) {
                     continue;
                 }
-                else if (lines[i].StartsWith("//")) {
-                    if (lines[i].Trim() == "//") {
-                        break;
-                    }
-                    else if (lines[i].Trim() == "///") {
-                        content.Add("//");
-                    }
-                    else {
-                        content.Add(lines[i]);
-                    }
+                else if (lines[i].StartsWith(":)")) {
+                    break;
                 }
                 else {
                     content.Add(lines[i]);
@@ -249,7 +241,7 @@ namespace X2MANTools {
 
         List<string> ParseCommand(string line) {
             var fields = new List<string>();
-            foreach (var field in line.TrimStart('>').Split('|')) {
+            foreach (var field in line.Replace(":)", "").Trim().TrimStart('(').TrimStart(':').TrimEnd('|').Split('|')) {
                 fields.Add(field.Trim());
             }
             return fields;
