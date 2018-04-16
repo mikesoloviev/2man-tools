@@ -31,10 +31,7 @@ namespace X2MANTools {
             var i = 0;
             while (i < lines.Count()) {
                 var line = lines[i];
-                if (line.StartsWith("<<")) {
-                    new TemplateEngine(projectDirectory, templateDirectory).Apply(line.TrimStart('<').Trim());
-                }
-                else if (line.StartsWith(">>")) {
+                if (line.StartsWith(">>")) {
                     if (skipNext) {
                         skipNext = false;
                     }
@@ -43,6 +40,8 @@ namespace X2MANTools {
                             var fields = ParseCommand(line);
                             var count = fields.Count();
                             switch (fields[0]) {
+                                case "apply":
+                                    CallApply(fields[1]); break;
                                 case "print":
                                     Print(fields[1], fields[2]); break;
                                 case "run":
@@ -65,8 +64,6 @@ namespace X2MANTools {
                                     EditInsertAfter(fields[1], fields[2], fields[3], GetContent(ref i)); break;
                                 case "edit-delete":
                                     EditDelete(fields[1], fields[2], fields[3]); break;
-                                case "edit-comment":
-                                    EditComment(fields[1], fields[2], fields[3]); break;
                                 case "guard-next":
                                     skipNext = !Guard(fields[1], fields[2], fields[3], fields[count - 2], fields[count - 1]); break;
                                 case "guard-rest":
@@ -88,7 +85,7 @@ namespace X2MANTools {
 
             // NOTE: more correct way is to get the default project namespace from *.csproj (<RootNamespace>MyWebApp</RootNamespace>),
             // however currently the NET Core scaffolding get it from the the project file/folder name like this:
-            vars["$project-name"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last(); 
+            vars["$project-name"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
             vars["$database-name"] = vars["$project-name"].Replace("-", "").Replace("_", "").Replace(" ", "").ToLower();
 
             vars["$project-folder"] = projectDirectory;
@@ -106,7 +103,7 @@ namespace X2MANTools {
             var path = Path.Combine(templateDirectory, template + templateExtension);
             if (File.Exists(path)) {
                 lines = new List<string>();
-                foreach(var line in File.ReadAllLines(path)) {
+                foreach (var line in File.ReadAllLines(path)) {
                     lines.Add(Eval(line));
                 }
                 return true;
@@ -122,16 +119,20 @@ namespace X2MANTools {
             switch (predicate) {
                 case "defined-var":
                     var varName = "$" + value1;
-                    success = vars.ContainsKey(varName) && !string.IsNullOrEmpty(vars[varName]); 
+                    success = vars.ContainsKey(varName) && !string.IsNullOrEmpty(vars[varName]);
                     break;
                 case "exist-file":
-                    success = File.Exists(Path.Combine(value1, value2)); 
+                    success = File.Exists(Path.Combine(value1, value2));
                     break;
             }
             if (!success) {
                 Print(messageType, messageContent);
             }
             return success;
+        }
+
+        void CallApply(string template) {
+            new TemplateEngine(projectDirectory, templateDirectory).Apply(template);
         }
 
         void Run(string workingDirectory, string command, string arguments) {
@@ -157,17 +158,17 @@ namespace X2MANTools {
             }
         }
 
-       void RemoveFolder(string parent, string folder) {
-           try {
+        void RemoveFolder(string parent, string folder) {
+            try {
                 Directory.Delete(Path.Combine(parent, folder), true);
             }
             catch {
             }
         }
 
-       void RemoveFile(string parent, string folder) {
-           try {
-                File.Delete(Path.Combine(parent, folder);
+        void RemoveFile(string parent, string folder) {
+            try {
+                File.Delete(Path.Combine(parent, folder));
             }
             catch {
             }
@@ -194,7 +195,7 @@ namespace X2MANTools {
         void EditInsert(string folder, string file, string label, string content, bool after) {
             var path = Path.Combine(folder, file);
             var text = File.ReadAllText(path);
-            var index = text.indexOf(label);
+            var index = text.IndexOf(label);
             var length = after ? label.Length : 0;
             if (index >= 0) {
                 try {
@@ -217,13 +218,6 @@ namespace X2MANTools {
             EditReplace(folder, file, label, "");
         }
 
-        void EditComment(string folder, string file, string label) {
-            var path = Path.Combine(folder, file);
-            var text = File.ReadAllText(path);
-            text = text.Replace(label, "// " + label);
-            File.WriteAllText(path, text);
-        }
-
         void Print(string type, string content) {
             Console.WriteLine($"2mantools {type}: {content}");
         }
@@ -236,7 +230,15 @@ namespace X2MANTools {
                     continue;
                 }
                 else if (lines[i].StartsWith("//")) {
-                    break;
+                    if (lines[i].Trim() == "//") {
+                        break;
+                    }
+                    else if (lines[i].Trim() == "///") {
+                        content.Add("//");
+                    }
+                    else {
+                        content.Add(lines[i]);
+                    }
                 }
                 else {
                     content.Add(lines[i]);
@@ -247,7 +249,7 @@ namespace X2MANTools {
 
         List<string> ParseCommand(string line) {
             var fields = new List<string>();
-            foreach(var field in line.TrimStart('>').Split('|')) {
+            foreach (var field in line.TrimStart('>').Split('|')) {
                 fields.Add(field.Trim());
             }
             return fields;

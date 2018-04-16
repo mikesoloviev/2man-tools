@@ -8,7 +8,9 @@
 >> edit-replace | $project-folder/Models/Data | DataStore.cs | protected override void OnConfiguring
 void _OnConfiguring
 //
->> edit-comment | $project-folder/Models/Data | DataStore.cs | #warning
+>> edit-replace | $project-folder/Models/Data | DataStore.cs | #warning
+// #warning
+//
 >> edit-create | $project-folder/Models/Data | DataStore.Extension.cs
 using Microsoft.EntityFrameworkCore;
 

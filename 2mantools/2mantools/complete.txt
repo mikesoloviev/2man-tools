@@ -1,3 +1,3 @@
-﻿<< upgrade
-<< example
-<< migrate
+﻿>> apply | upgrade
+>> apply | register
+>> apply | migrate
