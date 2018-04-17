@@ -48,10 +48,10 @@ namespace X2MANTools {
                                     Run(fields[1], fields[2], fields[3]); break;
                                 case "create-folder":
                                     CreateFolder(fields[1], fields[2]); break;
-                                case "remove-folder":
-                                    RemoveFolder(fields[1], fields[2]); break;
-                                case "remove-file":
-                                    RemoveFile(fields[1], fields[2]); break;
+                                case "delete-folder":
+                                    DeleteFolder(fields[1], fields[2]); break;
+                                case "delete-file":
+                                    DeleteFile(fields[1], fields[2]); break;
                                 case "edit-create":
                                     EditCreate(fields[1], fields[2], GetContent(ref i)); break;
                                 case "edit-append":
@@ -160,7 +160,7 @@ namespace X2MANTools {
             }
         }
 
-        void RemoveFolder(string parent, string folder) {
+        void DeleteFolder(string parent, string folder) {
             try {
                 Directory.Delete(Path.Combine(parent, folder), true);
             }
@@ -168,7 +168,7 @@ namespace X2MANTools {
             }
         }
 
-        void RemoveFile(string parent, string folder) {
+        void DeleteFile(string parent, string folder) {
             try {
                 File.Delete(Path.Combine(parent, folder));
             }
@@ -267,7 +267,7 @@ namespace X2MANTools {
 
         List<string> ParseCommand(string line) {
             var fields = new List<string>();
-            foreach (var field in line.Replace(":)", "").Trim().TrimStart('(').TrimStart(':').TrimEnd('|').Split('|')) {
+            foreach (var field in line.Replace("(:", "").Replace(":)", "").Replace("::", "").Trim().TrimEnd('|').Split('|')) {
                 fields.Add(field.Trim());
             }
             return fields;
