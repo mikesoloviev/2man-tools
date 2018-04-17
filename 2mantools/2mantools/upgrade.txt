@@ -11,25 +11,25 @@
 
 (: print | Info | Upgrading - Angular Material File Templates :)
 
-(: edit-append | $source-folder | styles.css ::
+(: edit-append | $source-folder | styles.css :)
 
 @import '~@angular/material/prebuilt-themes/indigo-pink.css';
 
-:)
+(:)
 
-(: edit-append | $source-folder | main.ts ::
+(: edit-append | $source-folder | main.ts :)
 
 import 'hammerjs';
 
-:)
+(:)
 
-(: edit-insert-before | $source-folder | index.html | </head> ::
+(: edit-insert-before | $source-folder | index.html | </head> :)
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-:)
+(:)
 
-(: edit-insert-before | $app-folder | app.module.ts | @NgModule ::
+(: edit-insert-before | $app-folder | app.module.ts | @NgModule :)
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   MatAutocompleteModule,
@@ -66,9 +66,9 @@ import {
   MatTooltipModule
 } from '@angular/material';
 
-:)
+(:)
 
-(: edit-insert-after | $app-folder | app.module.ts | imports: [ ::
+(: edit-insert-after | $app-folder | app.module.ts | imports: [ :)
 
     BrowserAnimationsModule,
     MatAutocompleteModule,
@@ -103,11 +103,11 @@ import {
     MatTabsModule,
     MatToolbarModule,
     MatTooltipModule,
-:)
+(:)
 
 (: edit-delete | $client-folder | .angular-cli.json | "../node_modules/bootstrap/dist/css/bootstrap.min.css" :)
 
-(: edit-replace | $client-folder | .angular-cli.json | "styles.css", ::
+(: edit-replace | $client-folder | .angular-cli.json | "styles.css", :)
 "styles.css"
-:)
+(:)
 

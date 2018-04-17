@@ -4,17 +4,17 @@
 (: create-folder | $project-folder | Models/Data :)
 (: create-folder | $project-folder | Services :)
 
-(: edit-insert-after | $project-folder | appsettings.Development.json | { ::
+(: edit-insert-after | $project-folder | appsettings.Development.json | { :)
 
   "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=$database-name;" },
-:)
+(:)
 
-(: edit-insert-after | $project-folder | appsettings.json | { ::
+(: edit-insert-after | $project-folder | appsettings.json | { :)
 
   "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=$database-name;" },
-:)
+(:)
 
-(: edit-create | $project-folder | migrate.sql ::
+(: edit-create | $project-folder | migrate.sql :)
 CREATE SCHEMA `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
@@ -22,9 +22,9 @@ CREATE TABLE `account` (
   `Username` VARCHAR(100) NOT NULL DEFAULT '',
   `Password` VARCHAR(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`Id`));
-:)
+(:)
 
-(: edit-create | $project-folder | deploy.sql ::
+(: edit-create | $project-folder | deploy.sql :)
 CREATE SCHEMA `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
@@ -32,9 +32,9 @@ CREATE TABLE `account` (
   `Username` VARCHAR(100) NOT NULL DEFAULT '',
   `Password` VARCHAR(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`Id`));
-:)
+(:)
 
-(: edit-create | $project-folder/Services | CustomDesignTimeServices.cs ::
+(: edit-create | $project-folder/Services | CustomDesignTimeServices.cs :)
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -55,9 +55,9 @@ public class CustomPluralizer : IPluralizer {
         return name;
     }
 }
-:)
+(:)
 
-(: edit-create | $project-folder/Models/Data | DataStore.Extension.cs ::
+(: edit-create | $project-folder/Models/Data | DataStore.Extension.cs :)
 using Microsoft.EntityFrameworkCore;
 
 namespace $project-name.Models.Data {
@@ -68,15 +68,15 @@ namespace $project-name.Models.Data {
         }
     }
 }
-:)
+(:)
 
-(: edit-insert-before | $project-folder | Startup.cs | namespace ::
+(: edit-insert-before | $project-folder | Startup.cs | namespace :)
 using Microsoft.EntityFrameworkCore;
 using $project-name.Models.Data;
 
-:)
+(:)
 
-(: edit-insert-before-block-end | $project-folder | Startup.cs | public void ConfigureServices | } ::
+(: edit-insert-before-block-end | $project-folder | Startup.cs | public void ConfigureServices | } :)
             services.AddDbContext<DataStore>(options => options.UseMySql(Configuration.GetConnectionString("DataStore")));
 
-:)
+(:)
