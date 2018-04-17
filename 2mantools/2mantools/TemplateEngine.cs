@@ -62,6 +62,8 @@ namespace X2MANTools {
                                     EditInsertBefore(fields[1], fields[2], fields[3], GetContent(ref i)); break;
                                 case "edit-insert-after":
                                     EditInsertAfter(fields[1], fields[2], fields[3], GetContent(ref i)); break;
+                                case "edit-insert-before-block-end":
+                                    EditInsertBeforeBlockEnd(fields[1], fields[2], fields[3], fields[4], GetContent(ref i)); break;
                                 case "edit-delete":
                                     EditDelete(fields[1], fields[2], fields[3]); break;
                                 case "guard-next":
@@ -206,6 +208,30 @@ namespace X2MANTools {
                 }
             }
         }
+
+        void EditInsertBeforeBlockEnd(string folder, string file, string start, string end, string content) {
+            var path = Path.Combine(folder, file);
+            var text = new StringBuilder(); 
+            var block = false;
+            foreach(var line in File.ReadAllLines(path)) {
+                if (line.Contains(start)) {
+                    text.AppendLine(line);
+                    block = true;
+                }
+                else if (block) {
+                    if (line.Trim() == end) {
+                        text.Append(content);
+                        block = false;
+                    }
+                    text.AppendLine(line);
+                }
+                else {
+                    text.AppendLine(line);
+                }
+            }
+            File.WriteAllText(path, text.ToString());
+        }
+        
 
         void EditReplace(string folder, string file, string label, string content) {
             var path = Path.Combine(folder, file);

@@ -1,5 +1,6 @@
 ﻿(: print | Info | Welcome - Adding or Replacing Files :)
 
+(: create-folder | $project-folder | Models :)
 (: create-folder | $project-folder | Models/Views :)
 (: create-folder | $project-folder | Models/Sets :)
 
@@ -32,5 +33,105 @@
 
 (: edit-create | $app-folder/home | home.component.html |
 <h1>Welcome to $project-name!</h1>
+:)
+
+(: edit-create | $project-folder/Models/Views | StatusView.cs |
+namespace $project-name.Models.Views {
+
+    public class StatusView {
+        public bool success { get; set; }
+    }
+}
+:)
+
+(: create-folder | $app-folder | error-bar :)
+
+(: edit-create | $app-folder/error-bar | error-bar.component.ts |
+import { Component, Input } from '@angular/core';
+import { MatSnackBar } from '@angular/material'; // needed?
+
+@Component({
+    selector: 'error-bar'
+})
+
+export class ErrorBarComponent {
+
+    _error: any | null = null;
+    snackBarRef: MatSnackBarRef | null = null;
+
+    @Input() 
+    set error(value: any | null) {
+        this._error = value;
+        if (value == null) {
+            this.hide();
+        }
+        else if ('exception' in value) {
+            this.show(value as ErrorView);
+        }
+        else {
+            this.show(<ErrorView>{ message: 'Unknown error.', exception: JSON.stringify(value) });
+        }
+    }
+
+    get error(): any | null {
+        return this._error;
+    }
+
+    constructor(private snackBar: MatSnackBar) {
+
+    }
+
+    show(errorView: ErrorView)  {
+        snackBarRef = snackBar.open(errorView.message);
+        console.log(`ERROR: ${errorView.message} / ${errorView.exception}`);
+    }
+
+    hide() {
+        if (snackBarRef != null) {
+            snackBarRef.dismiss();
+        }
+    }
+
+}
+:)
+
+
+(: edit-create | $project-folder/Models/Views | ErrorView.cs |
+namespace $project-name.Models.Views {
+
+    public class ErrorView {
+        public string message { get; set; }
+        public string exception { get; set; }
+    }
+}
+:)
+
+(: edit-create | $project-folder/Models/Sets | StatusResult.cs |
+using Microsoft.AspNetCore.Mvc;
+using $project-name.Models.Views;
+
+namespace $project-name.Models.Sets {
+
+    public class StatusResult: ObjectResult {
+
+        public StatusResult(bool success = true): base(new StatusView() { success = success }) {
+        }
+    }
+}
+:)
+
+(: edit-create | $project-folder/Models/Sets | ErrorResult.cs |
+using Microsoft.AspNetCore.Mvc;
+using $project-name.Models.Views;
+
+namespace $project-name.Models.Sets {
+
+    public class ErrorResult: ObjectResult {
+
+        public ErrorResult(string message, string exception = ""): base(new ErrorView() { message = message, exception = exception }) {
+            StatusCode = 500;
+        }
+    }
+}
 :)
 

@@ -9,7 +9,22 @@
   "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=$database-name;" },
 :)
 
+(: edit-insert-after | $project-folder | appsettings.json | { |
+
+  "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=$database-name;" },
+:)
+
 (: edit-create | $project-folder | migrate.sql |
+CREATE SCHEMA `$database-name`;
+USE `$database-name`;
+CREATE TABLE `account` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Username` VARCHAR(100) NOT NULL DEFAULT '',
+  `Password` VARCHAR(100) NOT NULL DEFAULT '',
+  PRIMARY KEY (`Id`));
+:)
+
+(: edit-create | $project-folder | deploy.sql |
 CREATE SCHEMA `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
@@ -23,15 +38,15 @@ CREATE TABLE `account` (
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 
-public class CustomDesignTimeServices : IDesignTimeServices
-{
+public class CustomDesignTimeServices : IDesignTimeServices {
+
     public void ConfigureDesignTimeServices(IServiceCollection serviceCollection) {
         serviceCollection.AddSingleton<IPluralizer, CustomPluralizer>();
     }
 }
 
-public class CustomPluralizer : IPluralizer
-{
+public class CustomPluralizer : IPluralizer {
+
     public string Pluralize(string name) {
         return name + "s";
     }
@@ -51,7 +66,17 @@ namespace $project-name.Models.Data {
 
         public DataStore(DbContextOptions<DataStore> options) : base(options) {
         }
-
     }
 }
+:)
+
+(: edit-insert-before | $project-folder | Startup.cs | namespace |
+using Microsoft.EntityFrameworkCore;
+using $project-name.Models.Data;
+
+:)
+
+(: edit-insert-before-block-end | $project-folder | Startup.cs | public void ConfigureServices | } |
+            services.AddDbContext<DataStore>(options => options.UseMySql(Configuration.GetConnectionString("DataStore")));
+
 :)
