@@ -65,14 +65,24 @@ import { ErrorBarComponent } from './components/error-bar/error-bar.component';
 
 (:)
 
+(: edit-insert-after | $app-folder | app.module.ts | declarations: [ :)
+    ErrorBarComponent,
+
+(:)
+
 (: create-folder | $app-folder/components | error-bar :)
+
+(: edit-create | $app-folder/components/error-bar | error-bar.component.html :)
+<div></div>
+(:)
 
 (: edit-create | $app-folder/components/error-bar | error-bar.component.ts :)
 import { Component, Input } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 
 @Component({
-  selector: 'error-bar'
+  selector: 'error-bar',
+  templateUrl: './error-bar.component.html'
 })
 
 export class ErrorBarComponent {

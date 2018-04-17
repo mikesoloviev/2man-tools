@@ -231,7 +231,6 @@ namespace X2MANTools {
             }
             File.WriteAllText(path, text.ToString());
         }
-        
 
         void EditReplace(string folder, string file, string label, string content) {
             var path = Path.Combine(folder, file);
@@ -252,11 +251,11 @@ namespace X2MANTools {
             var content = new List<string>();
             for (var i = index; i < lines.Count; i++) {
                 index = i;
-                if (lines[i].StartsWith("(:")) {
-                    continue;
-                }
-                else if (lines[i].StartsWith("(:)")) {
+                if (lines[i].StartsWith("(:)")) {
                     break;
+                }
+                else if (lines[i].StartsWith("(:")) {
+                    continue;
                 }
                 else {
                     content.Add(lines[i]);
