@@ -1,9 +1,11 @@
 ﻿(: print | Info | Welcome - Adding or Replacing Files :)
 
+(: create-folder | $project-folder | Common :)
 (: create-folder | $project-folder | Models :)
 (: create-folder | $project-folder | Models/Views :)
 (: create-folder | $project-folder | Models/Sets :)
 
+(: create-folder | $app-folder | common :)
 (: create-folder | $app-folder | components :)
 (: create-folder | $app-folder | interfaces :)
 (: create-folder | $app-folder | services :)

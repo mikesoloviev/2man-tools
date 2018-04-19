@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json.Linq;
 
 using System.Text;
 using System.Threading.Tasks;
@@ -274,8 +274,9 @@ namespace X2MANTools {
 
         string GetSettingsConnection(string path) {
             try {
-                var settings = JObject.Parse(File.ReadAllText(path));
-                return (string)settings["ConnectionStrings"]["DataStore"];
+                return new JsonSearch().FindString(path, "ConnectionStrings/DataStore");
+                //var settings = JObject.Parse(File.ReadAllText(path));
+                //return (string)settings["ConnectionStrings"]["DataStore"];
             }
             catch {
                 return null;
