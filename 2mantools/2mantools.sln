@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27520.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2mantools", "2mantools\2mantools.csproj", "{DA586156-A9F4-4094-8DFC-1B6DF7CE81F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2mantools", "2mantools\2mantools.csproj", "{DCC6BE27-7F69-4BB9-934D-8AC6E0C4C906}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DA586156-A9F4-4094-8DFC-1B6DF7CE81F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA586156-A9F4-4094-8DFC-1B6DF7CE81F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA586156-A9F4-4094-8DFC-1B6DF7CE81F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA586156-A9F4-4094-8DFC-1B6DF7CE81F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCC6BE27-7F69-4BB9-934D-8AC6E0C4C906}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCC6BE27-7F69-4BB9-934D-8AC6E0C4C906}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCC6BE27-7F69-4BB9-934D-8AC6E0C4C906}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCC6BE27-7F69-4BB9-934D-8AC6E0C4C906}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {2D7C19BB-A537-496E-B181-32C94F8961C0}
+		SolutionGuid = {3A41CEA4-9DBA-4198-91B6-F3EDE4BFFC21}
 	EndGlobalSection
 EndGlobal
