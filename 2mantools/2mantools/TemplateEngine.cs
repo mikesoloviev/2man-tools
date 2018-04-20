@@ -16,6 +16,8 @@ namespace X2MANTools {
         string templateDirectory;
         string templateExtension = ".txt";
 
+        Settings settings;
+
         Dictionary<string, string> vars;
         List<string> lines;
 
@@ -25,6 +27,8 @@ namespace X2MANTools {
         }
 
         public void Apply(string template) {
+            settings = new Settings();
+            settings.Load(Path.Combine(templateDirectory, "settings" + templateExtension));
             DefineVars();
             if (!LoadTemplate(template)) return;
             var skipNext = false;

@@ -46,12 +46,16 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RangeEngine.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="TemplateEngine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="settings.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="complete.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
