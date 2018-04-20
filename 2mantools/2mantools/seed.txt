@@ -15,7 +15,7 @@
 (:)
 
 (: edit-create | $project-folder | migrate.sql :)
-CREATE SCHEMA `$database-name`;
+CREATE DATABASE `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
   `Id` INT NOT NULL AUTO_INCREMENT,
@@ -25,7 +25,7 @@ CREATE TABLE `account` (
 (:)
 
 (: edit-create | $project-folder | deploy.sql :)
-CREATE SCHEMA `$database-name`;
+CREATE DATABASE `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
   `Id` INT NOT NULL AUTO_INCREMENT,
