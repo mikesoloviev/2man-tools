@@ -1,3 +1,3 @@
 # 2MAN Tools
 
-## Tools to setup a 2MAN Stack project
+## Tools to automate web development for a 2MAN Stack project
