@@ -12,23 +12,25 @@ namespace X2MANTools {
 
     public class TemplateEngine {
 
+        string appBaseDirectory;
         string projectDirectory;
         string templateDirectory;
-        string templateExtension = ".txt";
+        string templateExtension = ".sut"; // SmilUp Template
 
         Settings settings;
 
         Dictionary<string, string> vars;
         List<string> lines;
 
-        public TemplateEngine(string projectDirectory, string templateDirectory) {
+        public TemplateEngine(string appBaseDirectory, string projectDirectory, string templateDirectory) {
+            this.appBaseDirectory = appBaseDirectory;
             this.projectDirectory = projectDirectory;
             this.templateDirectory = templateDirectory;
         }
 
         public void Apply(string template) {
             settings = new Settings();
-            settings.Load(Path.Combine(templateDirectory, "settings" + templateExtension));
+            settings.Load(Path.Combine(appBaseDirectory, "settings.ini"));
             DefineVars();
             if (!LoadTemplate(template)) return;
             var skipNext = false;
@@ -138,7 +140,7 @@ namespace X2MANTools {
         }
 
         void CallApply(string template) {
-            new TemplateEngine(projectDirectory, templateDirectory).Apply(template);
+            new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply(template);
         }
 
         void Run(string workingDirectory, string command, string arguments) {

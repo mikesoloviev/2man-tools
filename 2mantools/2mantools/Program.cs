@@ -22,8 +22,9 @@ USAGE EXAMPLE:
 ";
 
         static void Main(string[] args) {
+            var appBaseDirectory = AppContext.BaseDirectory;
             var projectDirectory = Environment.CurrentDirectory;
-            var templateDirectory = AppContext.BaseDirectory;
+            var templateDirectory = appBaseDirectory;
             var templates = new List<string>();
             if (!args.Any()) {
                 Console.WriteLine(Usage);
@@ -43,7 +44,7 @@ USAGE EXAMPLE:
                 }
             }
             foreach (var template in templates) {
-                new TemplateEngine(projectDirectory, templateDirectory).Apply(template);
+                new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply(template);
             }
         }
 

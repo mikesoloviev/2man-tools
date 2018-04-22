@@ -1,0 +1,113 @@
+﻿(: print | Info | Upgrading - MySQL Libraries :)
+
+(: run | $project-folder | dotnet | add package Microsoft.EntityFrameworkCore.Tools -v 2.1.0-preview2-final :)
+(: run | $project-folder | dotnet | add package Pomelo.EntityFrameworkCore.MySql :)
+
+(: print | Info | Upgrading - Angular Material Libraries :)
+
+(: run | $client-folder | npm | install --save @angular/material @angular/cdk :)
+(: run | $client-folder | npm | install --save @angular/animations :)
+(: run | $client-folder | npm | install --save hammerjs :)
+
+(: print | Info | Upgrading - Angular Material File Templates :)
+
+(: edit-append | $source-folder | styles.css :)
+
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+(:)
+
+(: edit-append | $source-folder | main.ts :)
+
+import 'hammerjs';
+
+(:)
+
+(: edit-insert-before | $source-folder | index.html | </head> :)
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+(:)
+
+(: edit-insert-before | $app-folder | app.module.ts | @NgModule :)
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  MatAutocompleteModule,
+  MatButtonModule,
+  MatButtonToggleModule,
+  MatCardModule,
+  MatCheckboxModule,
+  MatChipsModule,
+  MatDatepickerModule,
+  MatDialogModule,
+  MatDividerModule,
+  MatExpansionModule,
+  MatGridListModule,
+  MatIconModule,
+  MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatNativeDateModule,
+  MatPaginatorModule,
+  MatProgressBarModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatRippleModule,
+  MatSelectModule,
+  MatSidenavModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatSnackBarModule,
+  MatSortModule,
+  MatStepperModule,
+  MatTableModule,
+  MatTabsModule,
+  MatToolbarModule,
+  MatTooltipModule
+} from '@angular/material';
+
+(:)
+
+(: edit-insert-after | $app-folder | app.module.ts | imports: [ :)
+
+    BrowserAnimationsModule,
+    MatAutocompleteModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatChipsModule,
+    MatDatepickerModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatExpansionModule,
+    MatGridListModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatMenuModule,
+    MatNativeDateModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatRadioModule,
+    MatRippleModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatSliderModule,
+    MatSlideToggleModule,
+    MatSnackBarModule,
+    MatSortModule,
+    MatStepperModule,
+    MatTableModule,
+    MatTabsModule,
+    MatToolbarModule,
+    MatTooltipModule,
+(:)
+
+(: edit-delete | $client-folder | .angular-cli.json | "../node_modules/bootstrap/dist/css/bootstrap.min.css" :)
+
+(: edit-replace | $client-folder | .angular-cli.json | "styles.css", :)
+"styles.css"
+(:)
+

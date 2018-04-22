@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 
 /*
- TODO: Possible values for sql-source and sql-target: ansi, mysql, mssql, oracle, sqlite.
+ TODO: Possible values for sql-type: mysql, mssql, oracle, sqlite.
  */ 
 
 namespace X2MANTools {
@@ -17,8 +17,8 @@ namespace X2MANTools {
         public void Load(string path) {
             try {
                 foreach (var line in File.ReadAllLines(path)) {
-                    if (line.StartsWith("(:")) {
-                        var fields = line.Trim().Replace("(:", "").Replace(":)", "").Split('|');
+                    if (line.Contains("=")) {
+                        var fields = line.Split('=');
                         Data[fields[0].Trim()] = fields[1].Trim();
                     }
                 }
