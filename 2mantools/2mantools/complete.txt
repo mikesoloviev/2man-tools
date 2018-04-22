@@ -1,4 +1,0 @@
-﻿(: apply | upgrade :)
-(: apply | seed :)
-(: apply | migrate :)
-(: apply | welcome :)
