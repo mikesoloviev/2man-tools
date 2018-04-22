@@ -1,3 +1,0 @@
-﻿(: mysqlsh-path-windows | C:/Program Files/MySQL/MySQL Shell 1.0/bin :)
-(: sql-source | ansi :)
-(: sql-target | mysql :)
