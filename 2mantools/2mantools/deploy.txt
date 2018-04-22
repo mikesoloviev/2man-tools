@@ -1,4 +1,0 @@
-﻿(: print | Info | Deploying - Modifying Database :)
-(: guard-rest | defined-var | shell-connection-pub | Error | Failed to get the production database connection string :)
-(: guard-next | exist-file | $project-folder | deploy.sql | Warning | The deployment file deploy.sql not found :)
-(: run | $project-folder | mysqlsh | $shell-connection-pub --sql --file=deploy.sql :)
