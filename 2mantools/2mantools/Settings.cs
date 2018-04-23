@@ -66,7 +66,7 @@ namespace X2MANTools {
         }
 
         void DefineSystem() {
-            context["ROOT"] = projectDirectory;
+            context["HOME"] = projectDirectory;
             context["NAME"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
             context["BASE"] = context["NAME"].Replace("-", "_").Replace(" ", "_").ToLower();
         }
