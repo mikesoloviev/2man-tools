@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-//using Newtonsoft.Json.Linq;
-
 using System.Text;
-using System.Threading.Tasks;
 
 namespace X2MANTools {
 
@@ -29,18 +26,18 @@ namespace X2MANTools {
 
         public void Apply(string template) {
             if (!LoadTemplate(template)) return;
-            var skipNext = false;
+            var tested = true;
+            var guarded = false;
             var i = 0;
             while (i < lines.Count()) {
                 var line = lines[i];
                 if (line.StartsWith("(:") && !line.StartsWith("(:)")) {
-                    if (skipNext) {
-                        skipNext = false;
+                    if (guarded) {
+                        guarded = false;
                     }
                     else {
                         try {
                             var fields = ParseCommand(line);
-                            var count = fields.Count();
                             switch (fields[0]) {
                                 case "apply":
                                     CallApply(fields[1]); break;
@@ -68,10 +65,27 @@ namespace X2MANTools {
                                     EditInsertBeforeBlockEnd(fields[1], fields[2], fields[3], fields[4], GetContent(ref i)); break;
                                 case "edit-delete":
                                     EditDelete(fields[1], fields[2], fields[3]); break;
+                                case "test-defined":
+                                    tested = TestDefined(fields[1]); break;
+                                case "test-file-exist":
+                                    tested = TestFileExist(fields[1], fields[2]); break;
                                 case "guard-next":
-                                    skipNext = !Guard(fields[1], fields[2], fields[3], fields[count - 2], fields[count - 1]); break;
+                                    if (tested) {
+                                        guarded = false;
+                                    }
+                                    else {
+                                        guarded = true;
+                                        Print(fields[1], fields[2]);
+                                    }
+                                    break;
                                 case "guard-rest":
-                                    if (!Guard(fields[1], fields[2], fields[3], fields[count - 2], fields[count - 1])) return; else break;
+                                    if (tested) {
+                                        break;
+                                    }
+                                    else {
+                                        Print(fields[1], fields[2]);
+                                        return;
+                                    }
                             }
                         }
                         catch (Exception e) {
@@ -99,20 +113,12 @@ namespace X2MANTools {
             }
         }
 
-        bool Guard(string predicate, string value1, string value2, string messageType, string messageContent) {
-            var success = false;
-            switch (predicate) {
-                case "defined":
-                    success = settings.HasValue(value1);
-                    break;
-                case "exist-file":
-                    success = File.Exists(Path.Combine(value1, value2));
-                    break;
-            }
-            if (!success) {
-                Print(messageType, messageContent);
-            }
-            return success;
+        bool TestDefined(string key) {
+            return settings.HasValue(key);
+        }
+
+        bool TestFileExist(string folder, string file) {
+            return File.Exists(Path.Combine(folder, file));
         }
 
         void CallApply(string template) {

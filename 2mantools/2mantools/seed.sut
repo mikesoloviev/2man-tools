@@ -35,6 +35,7 @@ CREATE TABLE `account` (
 (: edit-create | $project-folder/Services | CustomDesignTimeServices.cs :)
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 public class CustomDesignTimeServices : IDesignTimeServices {
 
@@ -45,8 +46,16 @@ public class CustomDesignTimeServices : IDesignTimeServices {
 
 public class CustomPluralizer : IPluralizer {
 
+    string[] esEnds = { "h", "s", "x", "z" };
+    string[] vowels = { "a", "e", "i", "o", "u", "y" };
+
     public string Pluralize(string name) {
-        return name + "s";
+        if (name.Length > 0 && esEnds.Contains(name.Substring(name.Length - 1)))
+            return name + "es";
+        else if (name.Length > 1 && name.EndsWith("y") && !vowels.Contains(name.Substring(name.Length - 2, 1)))
+            return name.Substring(0, name.Length - 1) + "ies";
+        else 
+            return name + "s";
     }
 
     public string Singularize(string name) {

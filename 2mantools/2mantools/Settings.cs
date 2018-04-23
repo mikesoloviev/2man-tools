@@ -5,14 +5,22 @@ using System.Text;
 using System.IO;
 
 /*
- TODO: Possible values for sql-type: mysql, mssql, oracle, sqlite.
- */ 
+TODO:
+ 
+(1) Possible values for sql-type: 
+      mysql, mssql, oracle, sqlite.
+
+(2) Filter by OS: 
+      mysqlsh | windows = ...
+      mysqlsh | macos = ...
+      mysqlsh | unix = ...
+ */
 
 namespace X2MANTools {
 
     public class Settings {
 
-        public Dictionary<string, string> context = new Dictionary<string, string>();
+        Dictionary<string, string> context = new Dictionary<string, string>();
 
         string appBaseDirectory;
         string projectDirectory;
@@ -25,7 +33,7 @@ namespace X2MANTools {
         }
 
         public string GetValue(string key) {
-            return context.ContainsKey(key) ? Data[key] : "";
+            return context.ContainsKey(key) ? context[key] : "";
         }
 
         public bool HasValue(string key) {
@@ -60,7 +68,7 @@ namespace X2MANTools {
         void DefineSystem() {
             context["ROOT"] = projectDirectory;
             context["NAME"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
-            context["BASE"] = = context["NAME"].Replace("-", "_").Replace(" ", "_").ToLower();
+            context["BASE"] = context["NAME"].Replace("-", "_").Replace(" ", "_").ToLower();
         }
         
     }

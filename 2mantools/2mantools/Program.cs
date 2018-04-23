@@ -22,9 +22,21 @@ USAGE EXAMPLE:
 ";
 
         static void Main(string[] args) {
+            // environment
             var appBaseDirectory = AppContext.BaseDirectory;
             var projectDirectory = Environment.CurrentDirectory;
             var templateDirectory = appBaseDirectory;
+            var osType = Environment.OSVersion.Platform.ToString().ToLower();
+            if (osType.StartsWith("mac")) {
+                osType = "macos";
+            }
+            else if (osType.StartsWith("unix")) {
+                osType = "unix";
+            }
+            else {
+                osType = "windows";
+            }
+            // arguments
             var templates = new List<string>();
             if (!args.Any()) {
                 Console.WriteLine(Usage);

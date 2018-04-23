@@ -1,3 +1,4 @@
 ﻿(: print | Info | Deploying - Modifying Database :)
-(: guard-next | exist-file | $project-folder | deploy.sql | Warning | The deployment file deploy.sql not found :)
-(: run | $project-folder | $mysqlsh | $shell-connection-pub --sql --file=deploy.sql :)
+(: test-file-exist | $project-folder | deploy.sql :)
+(: guard-next | Warning | The deployment file deploy.sql not found :)
+(: run | $project-folder | $mysqlsh | --host=$server-pub --port=$port-pub --user=$user-pub --password=$password-pub --sql --file=deploy.sql :)
