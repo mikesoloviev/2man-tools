@@ -1,7 +1,6 @@
 ﻿(: print | Info | Migrating - Modifying Database :)
-(: guard-rest | defined-var | shell-connection-dev | Error | Failed to get the development database connection string :)
 (: guard-next | exist-file | $project-folder | migrate.sql | Warning | The migration file migrate.sql not found :)
-(: run | $project-folder | mysqlsh | $shell-connection-dev --sql --file=migrate.sql :)
+(: run | $project-folder | $mysqlsh | --host=$server-dev --port=$port-dev --user=$user-dev --password=$password-dev --sql --file=migrate.sql :)
 (: print | Info | Migrating - Scaffolding Database :)
 (: create-folder | $project-folder | Models/Data :)
 (: run | $project-folder | dotnet | ef dbcontext scaffold "$config-connection-dev" Pomelo.EntityFrameworkCore.MySql -o "Models/Data" -c DataStore -f :)

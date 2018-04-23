@@ -6,32 +6,30 @@
 
 (: edit-insert-after | $project-folder | appsettings.Development.json | { :)
 
-  "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=$database-name;" },
+  "ConnectionStrings": { "DataStore": "server=$server-dev;port=$port-dev;user=$user-dev;password=$password-dev;database=$database-name;" },
 (:)
 
 (: edit-insert-after | $project-folder | appsettings.json | { :)
 
-  "ConnectionStrings": { "DataStore": "server=localhost;port=3306;user=root;password=mapleace;database=$database-name;" },
+  "ConnectionStrings": { "DataStore": "server=$server-pub;port=$port-pub;user=$user-pub;password=$password-pub;database=$database-name;" },
 (:)
 
 (: edit-create | $project-folder | migrate.sql :)
 CREATE DATABASE `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `Username` VARCHAR(100) NOT NULL DEFAULT '',
-  `Password` VARCHAR(100) NOT NULL DEFAULT '',
-  PRIMARY KEY (`Id`));
+  `Password` VARCHAR(100) NOT NULL DEFAULT '');
 (:)
 
 (: edit-create | $project-folder | deploy.sql :)
 CREATE DATABASE `$database-name`;
 USE `$database-name`;
 CREATE TABLE `account` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `Username` VARCHAR(100) NOT NULL DEFAULT '',
-  `Password` VARCHAR(100) NOT NULL DEFAULT '',
-  PRIMARY KEY (`Id`));
+  `Password` VARCHAR(100) NOT NULL DEFAULT '');
 (:)
 
 (: edit-create | $project-folder/Services | CustomDesignTimeServices.cs :)

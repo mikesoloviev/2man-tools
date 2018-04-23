@@ -18,20 +18,16 @@ namespace X2MANTools {
         string templateExtension = ".sut"; // SmilUp Template
 
         Settings settings;
-
-        Dictionary<string, string> vars;
         List<string> lines;
 
         public TemplateEngine(string appBaseDirectory, string projectDirectory, string templateDirectory) {
             this.appBaseDirectory = appBaseDirectory;
             this.projectDirectory = projectDirectory;
             this.templateDirectory = templateDirectory;
+            settings = new Settings(appBaseDirectory, projectDirectory);
         }
 
         public void Apply(string template) {
-            settings = new Settings();
-            settings.Load(Path.Combine(appBaseDirectory, "settings.ini"));
-            DefineVars();
             if (!LoadTemplate(template)) return;
             var skipNext = false;
             var i = 0;
@@ -88,31 +84,12 @@ namespace X2MANTools {
             }
         }
 
-        void DefineVars() {
-            vars = new Dictionary<string, string>();
-
-            // NOTE: more correct way is to get the default project namespace from *.csproj (<RootNamespace>MyWebApp</RootNamespace>),
-            // however currently the NET Core scaffolding get it from the the project file/folder name like this:
-            vars["$project-name"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
-            vars["$database-name"] = vars["$project-name"].Replace("-", "").Replace("_", "").Replace(" ", "").ToLower();
-
-            vars["$project-folder"] = projectDirectory;
-            vars["$client-folder"] = Path.Combine(vars["$project-folder"], "ClientApp");
-            vars["$source-folder"] = Path.Combine(vars["$client-folder"], "src");
-            vars["$app-folder"] = Path.Combine(vars["$source-folder"], "app");
-
-            vars["$config-connection-dev"] = GetSettingsConnection(Path.Combine(projectDirectory, "appsettings.Development.json")) ?? "";
-            vars["$config-connection-pub"] = GetSettingsConnection(Path.Combine(projectDirectory, "appsettings.json")) ?? "";
-            vars["$shell-connection-dev"] = MakeShellConnection(vars["$config-connection-dev"]) ?? "";
-            vars["$shell-connection-pub"] = MakeShellConnection(vars["$config-connection-pub"]) ?? "";
-        }
-
         bool LoadTemplate(string template) {
             var path = Path.Combine(templateDirectory, template + templateExtension);
             if (File.Exists(path)) {
                 lines = new List<string>();
                 foreach (var line in File.ReadAllLines(path)) {
-                    lines.Add(Eval(line));
+                    lines.Add(settings.Eval(line));
                 }
                 return true;
             }
@@ -125,9 +102,8 @@ namespace X2MANTools {
         bool Guard(string predicate, string value1, string value2, string messageType, string messageContent) {
             var success = false;
             switch (predicate) {
-                case "defined-var":
-                    var varName = "$" + value1;
-                    success = vars.ContainsKey(varName) && !string.IsNullOrEmpty(vars[varName]);
+                case "defined":
+                    success = settings.HasValue(value1);
                     break;
                 case "exist-file":
                     success = File.Exists(Path.Combine(value1, value2));
@@ -276,38 +252,6 @@ namespace X2MANTools {
                 fields.Add(field.Trim());
             }
             return fields;
-        }
-
-        string GetSettingsConnection(string path) {
-            try {
-                return new JsonSearch().FindString(path, "ConnectionStrings/DataStore");
-                //var settings = JObject.Parse(File.ReadAllText(path));
-                //return (string)settings["ConnectionStrings"]["DataStore"];
-            }
-            catch {
-                return null;
-            }
-        }
-
-        string MakeShellConnection(string connection) {
-            try {
-                var fields = connection.Split(';').Select(x => x.Split('=')).ToDictionary(x => x.First().Trim().ToLower(), x => x.Last().Trim());
-                return $"--host={fields["server"]} --user={fields["user"]} --password={fields["password"]}" + (fields.ContainsKey("port") ? $" --port={fields["port"]}" : "");
-            }
-            catch {
-                return null;
-            }
-        }
-
-        string Eval(string line) {
-            if (line.Contains("$")) {
-                foreach (var key in vars.Keys) {
-                    if (line.Contains(key)) {
-                        line = line.Replace(key, vars[key]);
-                    }
-                }
-            }
-            return line;
         }
 
     }
