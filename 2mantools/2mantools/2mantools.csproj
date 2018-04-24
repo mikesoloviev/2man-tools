@@ -53,27 +53,27 @@
     <Content Include="settings.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="complete.sut">
+    <Content Include="basicmysql\complete.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="deploy.sut">
+    <Content Include="basicmysql\deploy.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="migrate.sut">
+    <Content Include="basicmysql\migrate.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="seed.sut">
+    <Content Include="basicmysql\seed.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="upgrade.sut">
+    <Content Include="basicmysql\upgrade.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="welcome.sut">
+    <Content Include="basicmysql\welcome.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="mssql\test.sut">
+    <Content Include="basicmssql\upgrade.sut">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

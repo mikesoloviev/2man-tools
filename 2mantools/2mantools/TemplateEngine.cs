@@ -24,23 +24,28 @@ namespace X2MANTools {
             settings = new Settings(appBaseDirectory, projectDirectory);
         }
 
-        public void Apply(string template) {
-            if (!LoadTemplate(template)) return;
-            var tested = true;
+        public void Apply(string module, string template) {
+            if (module == "this") {
+                module = settings.GetValue("module");
+            }
+            if (!LoadTemplate(module, template)) return;
+            var success = true;
             var guarded = false;
             var i = 0;
             while (i < lines.Count()) {
                 var line = lines[i];
                 if (line.StartsWith("(:") && !line.StartsWith("(:)")) {
+                    var fields = ParseCommand(line);
                     if (guarded) {
-                        guarded = false;
+                        if (fields[0] == "unguard") {
+                            guarded = false;
+                        }
                     }
                     else {
                         try {
-                            var fields = ParseCommand(line);
                             switch (fields[0]) {
                                 case "apply":
-                                    CallApply(fields[1]); break;
+                                    CallApply(fields[1], fields[2]); break;
                                 case "print":
                                     Print(fields[1], fields[2]); break;
                                 case "run":
@@ -66,26 +71,18 @@ namespace X2MANTools {
                                 case "edit-delete":
                                     EditDelete(fields[1], fields[2], fields[3]); break;
                                 case "test-defined":
-                                    tested = TestDefined(fields[1]); break;
+                                    success = TestDefined(fields[1]); break;
+                                case "test-value":
+                                    success = TestValue(fields[1], fields[2]); break;
                                 case "test-file-exist":
-                                    tested = TestFileExist(fields[1], fields[2]); break;
-                                case "guard-next":
-                                    if (tested) {
-                                        guarded = false;
-                                    }
-                                    else {
-                                        guarded = true;
-                                        Print(fields[1], fields[2]);
-                                    }
+                                    success = TestFileExist(fields[1], fields[2]); break;
+                                case "guard":
+                                    guarded = !success;
+                                    success = true;
+                                    if (guarded && fields.Count == 3) Print(fields[1], fields[2]);
                                     break;
-                                case "guard-rest":
-                                    if (tested) {
-                                        break;
-                                    }
-                                    else {
-                                        Print(fields[1], fields[2]);
-                                        return;
-                                    }
+                                case "unguard":
+                                    break;
                             }
                         }
                         catch (Exception e) {
@@ -98,8 +95,8 @@ namespace X2MANTools {
             }
         }
 
-        bool LoadTemplate(string template) {
-            var path = Path.Combine(templateDirectory, template + templateExtension);
+        bool LoadTemplate(string module, string template) {
+            var path = Path.Combine(Path.Combine(templateDirectory, module), template + templateExtension);
             if (File.Exists(path)) {
                 lines = new List<string>();
                 foreach (var line in File.ReadAllLines(path)) {
@@ -117,12 +114,16 @@ namespace X2MANTools {
             return settings.HasValue(key);
         }
 
+        bool TestValue(string key, string value) {
+            return settings.GetValue(key) == value;
+        }
+
         bool TestFileExist(string folder, string file) {
             return File.Exists(Path.Combine(folder, file));
         }
 
-        void CallApply(string template) {
-            new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply(template);
+        void CallApply(string module, string template) {
+            new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply(module, template);
         }
 
         void Run(string workingDirectory, string command, string arguments) {

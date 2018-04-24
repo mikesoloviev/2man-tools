@@ -52,20 +52,11 @@ USAGE EXAMPLE:
                             projectDirectory = args[i + 1]; break;
                         case "-t":
                             templateDirectory = args[i + 1]; break;
-                            /*
-                            case "-i":
-
-                            TODO: 
-                            Process '-i' option, like '-i mssql'.
-                            This is the 'import' command: copy all files (*.sut and *.ini)
-                            from the argument subfolder (i.e. 'mssql') of the template folder
-                            into the template folder itself.
-                            */
                     }
                 }
             }
             foreach (var template in templates) {
-                new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply(template);
+                new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply("this", template);
             }
         }
 
