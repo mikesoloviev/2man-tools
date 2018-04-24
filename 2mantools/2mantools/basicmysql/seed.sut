@@ -46,11 +46,11 @@ public class CustomDesignTimeServices : IDesignTimeServices {
 
 public class CustomPluralizer : IPluralizer {
 
-    string[] esEnds = { "h", "s", "x", "z" };
+    string[] sibilants = { "h", "s", "x", "z" };
     string[] vowels = { "a", "e", "i", "o", "u", "y" };
 
     public string Pluralize(string name) {
-        if (name.Length > 0 && esEnds.Contains(name.Substring(name.Length - 1)))
+        if (name.Length > 0 && sibilants.Contains(name.Substring(name.Length - 1)))
             return name + "es";
         else if (name.Length > 1 && name.EndsWith("y") && !vowels.Contains(name.Substring(name.Length - 2, 1)))
             return name.Substring(0, name.Length - 1) + "ies";
