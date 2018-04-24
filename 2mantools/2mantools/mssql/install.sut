@@ -1,2 +1,0 @@
-﻿(: print | Info | TEST - Installing MS SQL Database :)
-(: run | dotnet | add package Microsoft.EntityFrameworkCore.SqlServer :)
