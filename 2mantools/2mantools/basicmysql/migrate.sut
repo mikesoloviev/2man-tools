@@ -1,0 +1,14 @@
+﻿(: print | Info | Migrating - Modifying Database :)
+(: test-file-exist | $project-folder | migrate.sql :)
+(: guard | Warning | The migration file migrate.sql not found :)
+(: run | $project-folder | $mysqlsh | --host=$server-dev --port=$port-dev --user=$user-dev --password=$password-dev --sql --file=migrate.sql :)
+(: unguard :)
+(: print | Info | Migrating - Scaffolding Database :)
+(: create-folder | $project-folder | Models/Data :)
+(: run | $project-folder | dotnet | ef dbcontext scaffold "server=$server-dev;port=$port-dev;user=$user-dev;password=$password-dev;database=$database-name;" Pomelo.EntityFrameworkCore.MySql -o "Models/Data" -c DataStore -f :)
+(: edit-replace | $project-folder/Models/Data | DataStore.cs | protected override void OnConfiguring :)
+void _OnConfiguring
+(:)
+(: edit-replace | $project-folder/Models/Data | DataStore.cs | #warning :)
+// #warning
+(:)

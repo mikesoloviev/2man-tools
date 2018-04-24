@@ -1,0 +1,193 @@
+﻿(: print | Info | Welcome - Adding or Replacing Files :)
+
+(: create-folder | $project-folder | Common :)
+(: create-folder | $project-folder | Models :)
+(: create-folder | $project-folder | Models/Views :)
+(: create-folder | $project-folder | Models/Sets :)
+
+(: create-folder | $app-folder | common :)
+(: create-folder | $app-folder | components :)
+(: create-folder | $app-folder | interfaces :)
+(: create-folder | $app-folder | services :)
+
+(: edit-create | $app-folder | app.component.html :)
+<mat-sidenav-container class="main-sidenav-container">
+  <mat-sidenav mode="side" opened class="main-sidenav">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/">Home</a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+(:)
+ 
+(: edit-create | $app-folder | app.component.css :)
+.main-sidenav-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.main-sidenav {
+  width: 300px;
+}
+(:)
+
+(: delete-folder | $app-folder | home :)
+
+(: edit-delete | $app-folder | app.module.ts | import { HomeComponent } from './home/home.component'; :)
+
+(: edit-insert-before | $app-folder | app.module.ts | @NgModule :)
+import { HomeComponent } from './components/home/home.component';
+
+(:)
+
+(: edit-create | $app-folder/components/home | home.component.ts :)
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'home',
+  templateUrl: './home.component.html',
+})
+
+export class HomeComponent {
+}
+(:)
+
+(: edit-create | $app-folder/components/home | home.component.html :)
+<h1>Welcome to $project-name!</h1>
+(:)
+
+(: edit-insert-before | $app-folder | app.module.ts | @NgModule :)
+import { ErrorBarComponent } from './components/error-bar/error-bar.component';
+
+(:)
+
+(: edit-insert-after | $app-folder | app.module.ts | declarations: [ :)
+    ErrorBarComponent,
+
+(:)
+
+(: create-folder | $app-folder/components | error-bar :)
+
+(: edit-create | $app-folder/components/error-bar | error-bar.component.html :)
+<div></div>
+(:)
+
+(: edit-create | $app-folder/components/error-bar | error-bar.component.ts :)
+import { Component, Input } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+
+@Component({
+  selector: 'error-bar',
+  templateUrl: './error-bar.component.html'
+})
+
+export class ErrorBarComponent {
+
+  _error: any | null = null;
+  snackBarRef: MatSnackBarRef<SimpleSnackBar> | null = null;
+
+  @Input()
+  set error(value: any | null) {
+    this._error = value;
+    if (value == null) {
+      this.hide();
+    }
+    else if ('exception' in value) {
+      this.show(value as ErrorView);
+    }
+    else {
+      this.show(<ErrorView>{ message: 'Unknown error.', exception: JSON.stringify(value) });
+    }
+  }
+
+  get error(): any | null {
+    return this._error;
+  }
+
+  constructor(private snackBar: MatSnackBar) {
+  }
+
+  show(errorView: ErrorView) {
+    this.snackBarRef = this.snackBar.open(errorView.message);
+    if (errorView.exception) {
+      console.log(`ERROR: ${errorView.message} / ${errorView.exception}`);
+    }
+  }
+
+  hide() {
+    if (this.snackBarRef != null) {
+      this.snackBarRef.dismiss();
+    }
+  }
+
+}
+(:)
+
+(: edit-create | $project-folder/Models/Views | StatusView.cs :)
+namespace $project-name.Models.Views {
+
+    public class StatusView {
+        public bool success { get; set; }
+    }
+}
+(:)
+
+(: edit-create | $project-folder/Models/Views | ErrorView.cs :)
+namespace $project-name.Models.Views {
+
+    public class ErrorView {
+        public string message { get; set; }
+        public string exception { get; set; }
+    }
+}
+(:)
+
+(: edit-create | $project-folder/Models/Sets | StatusResult.cs :)
+using Microsoft.AspNetCore.Mvc;
+using $project-name.Models.Views;
+
+namespace $project-name.Models.Sets {
+
+    public class StatusResult: ObjectResult {
+
+        public StatusResult(bool success = true): base(new StatusView() { success = success }) {
+        }
+    }
+}
+(:)
+
+(: edit-create | $project-folder/Models/Sets | ErrorResult.cs :)
+using Microsoft.AspNetCore.Mvc;
+using $project-name.Models.Views;
+
+namespace $project-name.Models.Sets {
+
+    public class ErrorResult: ObjectResult {
+
+        public ErrorResult(string message, string exception = ""): base(new ErrorView() { message = message, exception = exception }) {
+            StatusCode = 500;
+        }
+    }
+}
+(:)
+
+(: edit-create | $app-folder/interfaces | StatusView.ts :)
+interface StatusView {
+  success: boolean;
+}
+(:)
+
+(: edit-create | $app-folder/interfaces | ErrorView.ts :)
+interface ErrorView {
+  message: string;
+  exception: string;
+}
+(:)
+
+
