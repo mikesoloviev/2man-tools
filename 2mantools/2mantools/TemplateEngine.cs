@@ -83,6 +83,8 @@ namespace X2MANTools {
                                     break;
                                 case "unguard":
                                     break;
+                                default:
+                                    break;
                             }
                         }
                         catch (Exception e) {
@@ -105,7 +107,7 @@ namespace X2MANTools {
                 return true;
             }
             else {
-                Print("Error", $"Template {template} not found at {path}.");
+                Print("Error", $"Template '{template}' in module '{module}' not found at: {path}.");
                 return false;
             }
         }
