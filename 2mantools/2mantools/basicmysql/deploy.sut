@@ -1,5 +1,6 @@
 ﻿(: print | Info | Deploying - Modifying Database :)
 (: test-file-exist | $project-folder | deploy.sql :)
 (: guard | Warning | The deployment file deploy.sql not found :)
-(: run | $project-folder | $mysqlsh | --host=$server-pub --port=$port-pub --user=$user-pub --password=$password-pub --sql --file=deploy.sql :)
+(: transform-sql | mysql | $project-folder | deploy.sql | temporary.sql :)
+(: run | $project-folder | $mysqlsh | --host=$server-pub --port=$port-pub --user=$user-pub --password=$password-pub --sql --file=temporary.sql :)
 (: unguard :)
