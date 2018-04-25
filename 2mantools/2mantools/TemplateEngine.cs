@@ -70,6 +70,8 @@ namespace X2MANTools {
                                     EditInsertBeforeBlockEnd(fields[1], fields[2], fields[3], fields[4], GetContent(ref i)); break;
                                 case "edit-delete":
                                     EditDelete(fields[1], fields[2], fields[3]); break;
+                                case "transform-sql":
+                                    TranformSql(fields[1], fields[2], fields[3], fields[4]); break;
                                 case "test-defined":
                                     success = TestDefined(fields[1]); break;
                                 case "test-value":
@@ -232,6 +234,10 @@ namespace X2MANTools {
 
         void EditDelete(string folder, string file, string label) {
             EditReplace(folder, file, label, "");
+        }
+
+        void TranformSql(string type, string folder, string source, string target) {
+            new CrossSql().Transform(Path.Combine(folder, source), Path.Combine(folder, target), type);
         }
 
         void Print(string type, string content) {

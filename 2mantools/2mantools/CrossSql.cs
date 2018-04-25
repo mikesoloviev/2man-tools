@@ -4,14 +4,20 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-// NOTE: Implementation not completed.
+// NOTE: For Oracle and SQLite the implementation is not completed.
 
 namespace X2MANTools {
 
     public class CrossSql {
 
         Dictionary<string, string> mysqlTable = new Dictionary<string, string> {
-            { "IDENTITY", "AUTO_INCREMENT" }
+            { "IDENTITY", "AUTO_INCREMENT" },
+            { "BIT", "BOOL" },
+            { "REAL", "FLOAT" },
+            { "FLOAT", "DOUBLE" },
+            { "TEXT", "LONGTEXT" },
+            { "NTEXT", "LONGTEXT" },
+            { "IMAGE", "LONGBLOB" }
         };
 
         Dictionary<string, string> sqliteTable = new Dictionary<string, string> {
