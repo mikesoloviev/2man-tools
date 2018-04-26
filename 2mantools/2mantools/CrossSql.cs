@@ -15,37 +15,59 @@ namespace X2MANTools {
             { "BIT", "BOOL" },
             { "REAL", "FLOAT" },
             { "FLOAT", "DOUBLE" },
-            { "TEXT", "LONGTEXT" },
-            { "NTEXT", "LONGTEXT" },
-            { "IMAGE", "LONGBLOB" }
+            { "VARCHAR(MAX)", "LONGTEXT" },
+            { "NVARCHAR(MAX)", "LONGTEXT" },
+            { "VARBINARY(MAX)", "LONGBLOB" }
         };
 
         Dictionary<string, string> sqliteTable = new Dictionary<string, string> {
             { "IDENTITY", "AUTOINCREMENT" },
-            { "USE", "-- USE" }
+            { "BIT", "BOOLEAN" },
+            { "REAL", "FLOAT" },
+            { "FLOAT", "DOUBLE" },
+            { "VARCHAR(MAX)", "CLOB" },
+            { "NVARCHAR(MAX)", "CLOB" },
+            { "VARBINARY(MAX)", "BLOB" }
         };
 
         Dictionary<string, string> oracleTable = new Dictionary<string, string> {
             { "IDENTITY", "GENERATED ALWAYS AS IDENTITY" },
             { "DATABASE", "SCHEMA" },
-            { "USE", "SET SCHEMA" }
+            { "USE", "SET SCHEMA" },
+            { "DATETIME", "TIMESTAMP(3)" },
+            { "BIT", "NUMBER(1)" },
+            { "INT", "NUMBER(10)" },
+            { "BIGINT", "NUMBER(19)" },
+            { "REAL", "BINARY_FLOAT" },
+            { "FLOAT", "BINARY_DOUBLE" },
+            { "VARCHAR(MAX)", "CLOB" },
+            { "NVARCHAR(MAX)", "NCLOB" },
+            { "VARBINARY(MAX)", "BLOB" }
         };
 
+        string[] varMaxKeywords = { "NVARCHAR", "VARCHAR", "VARBINARY"};
+
         public void Transform(string sourcePath, string targetPath, string targetType) {
+            targetType = targetType.ToLower();
+            if (targetType == "mssql") {
+                File.WriteAllText(targetPath, File.ReadAllText(sourcePath));
+                return;
+            }
             var words = ParseToWords(File.ReadAllLines(sourcePath));
-            switch (targetType.ToLower()) {
-                case "mssql": words = ToMssql(words); break;
-                case "mysql": words = ToMysql(words); break;
-                case "sqlite": words = ToSqlite(words); break;
-                case "oracle": words = ToOracle(words); break;
-                default: break;
+            switch (targetType {
+                case "mysql": 
+                    words = ToMysql(words); 
+                    break;
+                case "sqlite": 
+                    words = ToSqlite(words); 
+                    break;
+                case "oracle": 
+                    words = ToOracle(words); 
+                    break;
+                default: 
+                    break;
             }
             File.WriteAllText(targetPath, FormatToText(words));
-        }
-
-        string[] ToMssql(string[] inWords) {
-            // no transform required as of now
-            return inWords;
         }
 
         string[] ToMysql(string[] inWords) {
@@ -70,6 +92,9 @@ namespace X2MANTools {
                         outWords.Add("-- " + word);
                     else
                         outWords.Add(word);
+                }
+                else if (word == "USE") {
+                    outWords.Add("-- " + word);
                 }
                 else if (StartsWithLetter(word) && sqliteTable.ContainsKey(word)) {
                     outWords.Add(sqliteTable[word]);
@@ -96,12 +121,39 @@ namespace X2MANTools {
             var words = new List<string>();
             foreach (var line in lines) {
                 foreach (var token in line.Replace("(", " ( ").Replace(")", " ) ").Replace(",", " , ").Replace(";", " ; ").Split(' ')) {
-                    if (token == "") { /* skip */ }
-                    else if (token.StartsWith("\"")) { words.Add(token); }
-                    else { words.Add(token.ToUpper()); }
+                    if (token == "") { 
+                        /* skip */ 
+                    }
+                    else if (token.StartsWith("\"")) { 
+                        words.Add(token); 
+                    }
+                    else { 
+                        words.Add(token.ToUpper()); 
+                    }
                 }
             }
-            return words.ToArray();
+            return CoalesceVarMax(words);
+        }
+
+        string[] CoalesceVarMax(List<string> inWords) {
+            try {
+                var outWords = new List<string>();
+                var i = 0;
+                while (i < inWords.Count()) {
+                    if (varMaxKeywords.Contains(inWords[i]) && inWords[i + 2] == "MAX" && inWords[i + 1] == "(" && inWords[i + 3] == ")") {
+                        outWords.Add($"{inWords[i]}(MAX)");
+                        i += 4;                        
+                    }
+                    else {
+                        outWords.Add(inWords[i]);
+                        i++;
+                    }
+                }
+                return outWords.ToArray();
+            }
+            catch {
+                return inWords.ToArray();
+            }
         }
 
         string FormatToText(string[] words) {
@@ -109,7 +161,7 @@ namespace X2MANTools {
             for (var i = 0; i < words.Length; i++) {
                 switch (words[i]) {
                     case "(":
-                        if (i > 0 && (words[i - 1].EndsWith("\"") || words[i - 1].EndsWith("`"))) {
+                        if (i > 1 && words[i - 2] == "TABLE" && (words[i - 1].EndsWith("\"") || words[i - 1].EndsWith("`"))) {
                             text.Append(" ");
                             text.AppendLine(words[i]);
                             text.Append(" ");
@@ -130,7 +182,6 @@ namespace X2MANTools {
                         text.Append(words[i]);
                         break;
                 }
-
             }
             return text.ToString();
         }
