@@ -22,6 +22,8 @@ namespace X2MANTools {
 
         Dictionary<string, string> sqliteTable = new Dictionary<string, string> {
             { "IDENTITY", "AUTOINCREMENT" },
+            { "INT", "INTEGER" },
+            { "BIGINT", "INTEGER" },
             { "BIT", "BOOLEAN" },
             { "REAL", "FLOAT" },
             { "FLOAT", "DOUBLE" },
@@ -54,7 +56,7 @@ namespace X2MANTools {
                 return;
             }
             var words = ParseToWords(File.ReadAllLines(sourcePath));
-            switch (targetType {
+            switch (targetType) {
                 case "mysql": 
                     words = ToMysql(words); 
                     break;
@@ -119,16 +121,36 @@ namespace X2MANTools {
 
         string[] ParseToWords(string[] lines) {
             var words = new List<string>();
+            var quoted = false;
+            var qoute = new List<string>();
             foreach (var line in lines) {
                 foreach (var token in line.Replace("(", " ( ").Replace(")", " ) ").Replace(",", " , ").Replace(";", " ; ").Split(' ')) {
-                    if (token == "") { 
-                        /* skip */ 
+                    if (token == "") {
+                        /* skip */
                     }
-                    else if (token.StartsWith("\"")) { 
-                        words.Add(token); 
+                    else if (token.StartsWith("\"")) {
+                        words.Add(token);
                     }
-                    else { 
-                        words.Add(token.ToUpper()); 
+                    else if (token.StartsWith("'")) {
+                        if (token.EndsWith("'")) {
+                            words.Add(token);
+                        }
+                        else {
+                            quoted = true;
+                            qoute = new List<string>();
+                            qoute.Add(token);
+                        }
+                    }
+                    else if (token.EndsWith("'")) {
+                        quoted = false;
+                        qoute.Add(token);
+                        words.Add(string.Join(" ", qoute));
+                    }
+                    else if (quoted) {
+                        qoute.Add(token);
+                    }
+                    else {
+                        words.Add(token.ToUpper());
                     }
                 }
             }
@@ -158,13 +180,16 @@ namespace X2MANTools {
 
         string FormatToText(string[] words) {
             var text = new StringBuilder();
+            var creating = false;
+            var head = false;
             for (var i = 0; i < words.Length; i++) {
                 switch (words[i]) {
                     case "(":
-                        if (i > 1 && words[i - 2] == "TABLE" && (words[i - 1].EndsWith("\"") || words[i - 1].EndsWith("`"))) {
+                        if (creating && head) {
                             text.Append(" ");
                             text.AppendLine(words[i]);
                             text.Append(" ");
+                            head = false;
                         }
                         else {
                             text.Append(words[i]);
@@ -173,9 +198,23 @@ namespace X2MANTools {
                     case ")":
                         text.Append(words[i]);
                         break;
-                    case ",":
+                    case ",": 
+                        if (creating) {
+                            text.AppendLine(words[i]);
+                        }
+                        else {
+                            text.Append(words[i]);
+                        }
+                        break;
                     case ";":
                         text.AppendLine(words[i]);
+                        creating = false;
+                        break;
+                    case "CREATE":
+                        creating = true;
+                        head = true;
+                        text.Append(" ");
+                        text.Append(words[i]);
                         break;
                     default:
                         if (i == 0 || words[i - 1] != "(") text.Append(" ");
