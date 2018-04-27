@@ -4,18 +4,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-/*
-TODO:
- 
-(1) Possible values for sql-type: 
-      mysql, mssql, oracle, sqlite.
-
-(2) Filter by OS: 
-      mysqlsh | windows = ...
-      mysqlsh | macos = ...
-      mysqlsh | unix = ...
- */
-
 namespace X2MANTools {
 
     public class Settings {
@@ -24,10 +12,12 @@ namespace X2MANTools {
 
         string appBaseDirectory;
         string projectDirectory;
+        string os;
 
-        public Settings(string appBaseDirectory, string projectDirectory) {
+        public Settings(string appBaseDirectory, string projectDirectory, string os) {
             this.appBaseDirectory = appBaseDirectory;
             this.projectDirectory = projectDirectory;
+            this.os = os;
             DefineSystem();
             Load();
         }
@@ -54,8 +44,13 @@ namespace X2MANTools {
 
         void Load() {
             try {
-                foreach (var line in File.ReadAllLines(Path.Combine(appBaseDirectory, "settings.ini"))) {
-                    if (line.Contains("=")) {
+                var group = "any";
+                foreach (var rawLine in File.ReadAllLines(Path.Combine(appBaseDirectory, "settings.ini"))) {
+                    var line = rawLine.Trim();
+                    if (line.StartsWith("[")) {
+                        group = line.TrimStart("[").TrimEnd("]").Trim().ToLower();
+                    }
+                    else if (line.Contains("=") && (group == "any" || group == os)) {
                         var fields = line.Split('=');
                         context[fields[0].Trim()] = Eval(fields[1].Trim());
                     }
@@ -67,8 +62,8 @@ namespace X2MANTools {
 
         void DefineSystem() {
             context["HOME"] = projectDirectory;
-            context["NAME"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
-            context["BASE"] = context["NAME"].Replace("-", "_").Replace(" ", "_").ToLower();
+            context["PROJECT"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
+            context["DATABASE"] = context["NAME"].Replace("-", "_").Replace(" ", "_").ToLower();
         }
         
     }

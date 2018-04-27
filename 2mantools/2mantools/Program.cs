@@ -26,15 +26,15 @@ USAGE EXAMPLE:
             var appBaseDirectory = AppContext.BaseDirectory;
             var projectDirectory = Environment.CurrentDirectory;
             var templateDirectory = appBaseDirectory;
-            var osType = Environment.OSVersion.Platform.ToString().ToLower();
-            if (osType.StartsWith("mac")) {
-                osType = "macos";
+            var os = Environment.OSVersion.Platform.ToString().ToLower();
+            if (os.StartsWith("mac")) {
+                os = "macos";
             }
             else if (osType.StartsWith("unix")) {
-                osType = "unix";
+                os = "unix";
             }
             else {
-                osType = "windows";
+                os = "windows";
             }
             // arguments
             var templates = new List<string>();
@@ -56,7 +56,7 @@ USAGE EXAMPLE:
                 }
             }
             foreach (var template in templates) {
-                new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply("this", template);
+                new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory, os).Apply("this", template);
             }
         }
 

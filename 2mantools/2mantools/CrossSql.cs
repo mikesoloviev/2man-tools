@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-// NOTE: For Oracle and SQLite the implementation is not completed.
+// NOTE: For Oracle the implementation is not completed.
 
 namespace X2MANTools {
 
@@ -24,11 +24,12 @@ namespace X2MANTools {
             { "IDENTITY", "AUTOINCREMENT" },
             { "INT", "INTEGER" },
             { "BIGINT", "INTEGER" },
-            { "BIT", "BOOLEAN" },
-            { "REAL", "FLOAT" },
-            { "FLOAT", "DOUBLE" },
-            { "VARCHAR(MAX)", "CLOB" },
-            { "NVARCHAR(MAX)", "CLOB" },
+            { "DATETIME", "TEXT" },
+            { "BIT", "INTEGER" },
+            { "REAL", "NUMERIC" },
+            { "FLOAT", "NUMERIC" },
+            { "VARCHAR(MAX)", "TEXT" },
+            { "NVARCHAR(MAX)", "TEXT" },
             { "VARBINARY(MAX)", "BLOB" }
         };
 
@@ -180,26 +181,27 @@ namespace X2MANTools {
 
         string FormatToText(string[] words) {
             var text = new StringBuilder();
-            var creating = false;
-            var head = false;
+            var create = false;
+            var level = 0;
             for (var i = 0; i < words.Length; i++) {
                 switch (words[i]) {
                     case "(":
-                        if (creating && head) {
+                        level++;
+                        if (create && level == 1) {
                             text.Append(" ");
                             text.AppendLine(words[i]);
                             text.Append(" ");
-                            head = false;
                         }
                         else {
                             text.Append(words[i]);
                         }
                         break;
                     case ")":
+                        level--;
                         text.Append(words[i]);
                         break;
                     case ",": 
-                        if (creating) {
+                        if (create && level == 1) {
                             text.AppendLine(words[i]);
                         }
                         else {
@@ -208,11 +210,10 @@ namespace X2MANTools {
                         break;
                     case ";":
                         text.AppendLine(words[i]);
-                        creating = false;
+                        create = false;
                         break;
                     case "CREATE":
-                        creating = true;
-                        head = true;
+                        create = true;
                         text.Append(" ");
                         text.Append(words[i]);
                         break;

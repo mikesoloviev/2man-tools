@@ -13,15 +13,17 @@ namespace X2MANTools {
         string projectDirectory;
         string templateDirectory;
         string templateExtension = ".sut"; // SmilUp Template
+        string os;
 
         Settings settings;
         List<string> lines;
 
-        public TemplateEngine(string appBaseDirectory, string projectDirectory, string templateDirectory) {
+        public TemplateEngine(string appBaseDirectory, string projectDirectory, string templateDirectory, string os) {
             this.appBaseDirectory = appBaseDirectory;
             this.projectDirectory = projectDirectory;
             this.templateDirectory = templateDirectory;
-            settings = new Settings(appBaseDirectory, projectDirectory);
+            this.os = os;
+            settings = new Settings(appBaseDirectory, projectDirectory, os);
         }
 
         public void Apply(string module, string template) {
@@ -127,7 +129,7 @@ namespace X2MANTools {
         }
 
         void CallApply(string module, string template) {
-            new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory).Apply(module, template);
+            new TemplateEngine(appBaseDirectory, projectDirectory, templateDirectory, os).Apply(module, template);
         }
 
         void Run(string workingDirectory, string command, string arguments) {
