@@ -1,0 +1,152 @@
+See: 
+
+https://www.devart.com/dotconnect/sqlite/docs/EFCore-Database-First-NET-Core.html
+https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite
+https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/working-with-sql?view=aspnetcore-2.1
+https://docs.microsoft.com/en-us/ef/core/providers/
+
+*********
+
+Working with .NET Core 2.0 with Visual Studio 2017 (not Preview)
+
+(1) Install-Package Microsoft.EntityFrameworkCore.Tools
+   (ver. 2.0.2 installed)
+
+(2) Install-Package Microsoft.EntityFrameworkCore.Sqlite
+    (ver. 2.0.2 installed)
+
+(3) Use sqlite3.exe to create database (mydatasource.db) and tables 
+    and move database to the project folder
+
+(4) Scaffold-DbContext "datasource=mydatasource.db;" Microsoft.EntityFrameworkCore.Sqlite -OutputDir Models -Context DataStore -Force
+
+(5) services.AddDbContext<DataStore>(options => options.UseSqlite("datasource=mydatasource.db"));
+
+***********
+
+Devart library doesn't work -- probably as it is paid or registration is required
+
+Install-Package Devart.Data.SQLite.EFCore
+Scaffold-DbContext "datasource=mydatasource.db;" Devart.Data.SQLite.EFCore -OutputDir Models -Context DataStore -Force
+
+***********
+
+sqlite3.exe mydatasource.db < migrate.sql
+
+
+NOTE:
+* INTEGER PRIMARY KEY -> create auto inrcement
+* INT PRIMARY KEY -> doesn't
+* INTEGER NOT NULL PRIMARY KEY -> doesn't
+
+CREATE TABLE "user_account" (
+  "Id" INTEGER PRIMARY KEY,
+  "Username" VARCHAR(100) NOT NULL DEFAULT '',
+  "Password" VARCHAR(100) NOT NULL DEFAULT '',
+  "ExDateTime" DATETIME NULL,
+  "ExBigInt" BIGINT NOT NULL DEFAULT 1,
+  "ExBoolean" BOOLEAN NOT NULL DEFAULT 1,
+  "ExFloat" FLOAT NOT NULL DEFAULT 1,
+  "ExDouble" DOUBLE NOT NULL DEFAULT 1,
+  "ExClob" CLOB NULL
+  );
+
+INSERT INTO "user_account" ("Username", "Password") VALUES ('admin', 'admin');
+
+
+    public partial class UserAccount
+    {
+        public long Id { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string ExDateTime { get; set; }
+        public long ExBigInt { get; set; }
+        public string ExBoolean { get; set; }
+        public double ExFloat { get; set; }
+        public double ExDouble { get; set; }
+        public string ExClob { get; set; }
+    }
+
+            modelBuilder.Entity<UserAccount>(entity =>
+            {
+                entity.ToTable("user_account");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.ExBigInt)
+                    .HasColumnType("BIGINT")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.ExBoolean)
+                    .IsRequired()
+                    .HasColumnType("BOOLEAN")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.ExClob).HasColumnType("CLOB");
+
+                entity.Property(e => e.ExDateTime).HasColumnType("DATETIME");
+
+                entity.Property(e => e.ExDouble)
+                    .HasColumnType("DOUBLE")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.ExFloat)
+                    .HasColumnType("FLOAT")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.Password)
+                    .IsRequired()
+                    .HasColumnType("VARCHAR(100)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.Username)
+                    .IsRequired()
+                    .HasColumnType("VARCHAR(100)")
+                    .HasDefaultValueSql("''");
+            });
+
+CREATE TABLE "company" (
+   "Id" INTEGER PRIMARY KEY AUTOINCREMENT,
+   "Name" TEXT NOT NULL,
+   "Age" INT NOT NULL,
+   "Address" VARCHAR(50),
+   "Salary" REAL
+);
+
+INSERT INTO "company"("Name", "Age", "Address", "Salary") VALUES ('Paul', 32, 'California', 20000.00);
+
+    public partial class Company
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public long Age { get; set; }
+        public string Address { get; set; }
+        public double? Salary { get; set; }
+    }
+
+            modelBuilder.Entity<Company>(entity =>
+            {
+                entity.ToTable("company");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Address).HasColumnType("VARCHAR(50)");
+
+                entity.Property(e => e.Age).HasColumnType("INT");
+
+                entity.Property(e => e.Name).IsRequired();
+            });
+
+**********
+
+DELPOYMENT
+
+https://stackoverflow.com/questions/37317754/where-to-put-sqlite-database-file-in-azure-app-service?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+path on Azure for writable data
+
+d:\home\site\wwwroot\
+
+https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/directory-structure?view=aspnetcore-2.1
+https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/?view=aspnetcore-2.1&tabs=aspnetcore2x
+
