@@ -1,1 +1,2 @@
-t
+﻿(: print | Info | Installing MS SQL Database Library :)
+(: run | dotnet | add package Microsoft.EntityFrameworkCore.SqlServer :)
