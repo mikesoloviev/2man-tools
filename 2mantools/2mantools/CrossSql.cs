@@ -10,64 +10,36 @@ namespace X2MANTools {
 
     public class CrossSql {
 
-        Dictionary<string, string> mysqlTable = new Dictionary<string, string> {
-            { "IDENTITY", "AUTO_INCREMENT" },
-            { "BIT", "BOOL" },
-            { "REAL", "FLOAT" },
-            { "FLOAT", "DOUBLE" },
-            { "VARCHAR(MAX)", "LONGTEXT" },
-            { "NVARCHAR(MAX)", "LONGTEXT" },
-            { "VARBINARY(MAX)", "LONGBLOB" }
-        };
+        string appBaseDirectory;
 
-        Dictionary<string, string> sqliteTable = new Dictionary<string, string> {
-            { "IDENTITY", "AUTOINCREMENT" },
-            { "INT", "INTEGER" },
-            { "BIGINT", "INTEGER" },
-            { "DATETIME", "TEXT" },
-            { "BIT", "INTEGER" },
-            { "REAL", "NUMERIC" },
-            { "FLOAT", "NUMERIC" },
-            { "VARCHAR(MAX)", "TEXT" },
-            { "NVARCHAR(MAX)", "TEXT" },
-            { "VARBINARY(MAX)", "BLOB" }
-        };
-
-        Dictionary<string, string> oracleTable = new Dictionary<string, string> {
-            { "IDENTITY", "GENERATED ALWAYS AS IDENTITY" },
-            { "DATABASE", "SCHEMA" },
-            { "USE", "SET SCHEMA" },
-            { "DATETIME", "TIMESTAMP(3)" },
-            { "BIT", "NUMBER(1)" },
-            { "INT", "NUMBER(10)" },
-            { "BIGINT", "NUMBER(19)" },
-            { "REAL", "BINARY_FLOAT" },
-            { "FLOAT", "BINARY_DOUBLE" },
-            { "VARCHAR(MAX)", "CLOB" },
-            { "NVARCHAR(MAX)", "NCLOB" },
-            { "VARBINARY(MAX)", "BLOB" }
-        };
+        Dictionary<string, Dictionary<string, string>> table = new Dictionary<string, Dictionary<string, string>>();
 
         string[] varMaxKeywords = { "NVARCHAR", "VARCHAR", "VARBINARY"};
 
+        public CrossSql(string appBaseDirectory) {
+            this.appBaseDirectory = appBaseDirectory;
+            Load();
+        }
+
         public void Transform(string sourcePath, string targetPath, string targetType) {
             targetType = targetType.ToLower();
-            if (targetType == "mssql") {
+            if (table.ContainsKey(targetType)) {
                 File.WriteAllText(targetPath, File.ReadAllText(sourcePath));
                 return;
             }
             var words = ParseToWords(File.ReadAllLines(sourcePath));
             switch (targetType) {
-                case "mysql": 
+                case Term.mysql: 
                     words = ToMysql(words); 
                     break;
-                case "sqlite": 
+                case Term.sqlite: 
                     words = ToSqlite(words); 
                     break;
-                case "oracle": 
+                case Term.oracle: 
                     words = ToOracle(words); 
                     break;
-                default: 
+                default:
+                    words = ToCustom(targetType, words);
                     break;
             }
             File.WriteAllText(targetPath, FormatToText(words));
@@ -78,8 +50,8 @@ namespace X2MANTools {
             foreach (var word in inWords) {
                 if (word.StartsWith("\""))
                     outWords.Add(word.Replace('"', '`'));
-                else if (StartsWithLetter(word) && mysqlTable.ContainsKey(word))
-                    outWords.Add(mysqlTable[word]);
+                else if (StartsWithLetter(word) && table[Term.mysql].ContainsKey(word))
+                    outWords.Add(table[Term.mysql][word]);
                 else
                     outWords.Add(word);
             }
@@ -99,8 +71,8 @@ namespace X2MANTools {
                 else if (word == "USE") {
                     outWords.Add("-- " + word);
                 }
-                else if (StartsWithLetter(word) && sqliteTable.ContainsKey(word)) {
-                    outWords.Add(sqliteTable[word]);
+                else if (StartsWithLetter(word) && table[Term.sqlite].ContainsKey(word)) {
+                    outWords.Add(table[Term.sqlite][word]);
                 }
                 else {
                     outWords.Add(word);
@@ -112,12 +84,45 @@ namespace X2MANTools {
         string[] ToOracle(string[] inWords) {
             var outWords = new List<string>();
             foreach (var word in inWords) {
-                if (StartsWithLetter(word) && oracleTable.ContainsKey(word))
-                    outWords.Add(oracleTable[word]);
+                if (StartsWithLetter(word) && table[Term.oracle].ContainsKey(word))
+                    outWords.Add(table[Term.oracle][word]);
                 else
                     outWords.Add(word);
             }
             return outWords.ToArray();
+        }
+
+        string[] ToCustom(string type, string[] inWords) {
+            var outWords = new List<string>();
+            foreach (var word in inWords) {
+                if (StartsWithLetter(word) && table[type].ContainsKey(word))
+                    outWords.Add(table[type][word]);
+                else
+                    outWords.Add(word);
+            }
+            return outWords.ToArray();
+        }
+
+        void Load() {
+            try {
+                var group = "";
+                foreach (var rawLine in File.ReadAllLines(Path.Combine(appBaseDirectory, "cross-sql.ini"))) {
+                    var line = rawLine.Trim();
+                    if (line.StartsWith(";") || line.StartsWith("#")) {
+                        // comment
+                    }
+                    else if (line.StartsWith("[")) {
+                        group = line.TrimStart('[').TrimEnd(']').Trim().ToLower();
+                        table[group] = new Dictionary<string, string>();
+                    }
+                    else if (line.Contains("=")) {
+                        var fields = line.Split('=');
+                        table[group][fields[0].Trim()] = fields[1].Trim();
+                    }
+                }
+            }
+            catch {
+            }
         }
 
         string[] ParseToWords(string[] lines) {

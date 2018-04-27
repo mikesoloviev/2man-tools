@@ -28,13 +28,13 @@ USAGE EXAMPLE:
             var templateDirectory = appBaseDirectory;
             var os = Environment.OSVersion.Platform.ToString().ToLower();
             if (os.StartsWith("mac")) {
-                os = "macos";
+                os = Term.macos;
             }
             else if (os.StartsWith("unix")) {
-                os = "unix";
+                os = Term.unix;
             }
             else {
-                os = "windows";
+                os = Term.windows;
             }
             // arguments
             var templates = new List<string>();

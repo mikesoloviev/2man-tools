@@ -44,13 +44,16 @@ namespace X2MANTools {
 
         void Load() {
             try {
-                var group = "any";
+                var group = Term.any;
                 foreach (var rawLine in File.ReadAllLines(Path.Combine(appBaseDirectory, "settings.ini"))) {
                     var line = rawLine.Trim();
-                    if (line.StartsWith("[")) {
+                    if (line.StartsWith(";") || line.StartsWith("#")) {
+                        // comment
+                    }
+                    else if (line.StartsWith("[")) {
                         group = line.TrimStart('[').TrimEnd(']').Trim().ToLower();
                     }
-                    else if (line.Contains("=") && (group == "any" || group == os)) {
+                    else if (line.Contains("=") && (group == Term.any || group == os)) {
                         var fields = line.Split('=');
                         context[fields[0].Trim()] = Eval(fields[1].Trim());
                     }
@@ -63,7 +66,7 @@ namespace X2MANTools {
         void DefineSystem() {
             context["HOME"] = projectDirectory;
             context["PROJECT"] = projectDirectory.Replace(@"\", "/").TrimEnd('/').Split('/').Last();
-            context["DATABASE"] = context["NAME"].Replace("-", "_").Replace(" ", "_").ToLower();
+            context["DATABASE"] = context["PROJECT"].Replace("-", "_").Replace(" ", "_").ToLower();
         }
         
     }

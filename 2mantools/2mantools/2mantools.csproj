@@ -48,6 +48,7 @@
     <Compile Include="RangeGenerator.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="TemplateEngine.cs" />
+    <Compile Include="Term.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="settings.ini">
@@ -84,6 +85,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="basicsqlite\upgrade.sut">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="cross-sql.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -16,6 +16,7 @@ namespace X2MANTools {
         string os;
 
         Settings settings;
+        CrossSql crossSql;
         List<string> lines;
 
         public TemplateEngine(string appBaseDirectory, string projectDirectory, string templateDirectory, string os) {
@@ -24,6 +25,7 @@ namespace X2MANTools {
             this.templateDirectory = templateDirectory;
             this.os = os;
             settings = new Settings(appBaseDirectory, projectDirectory, os);
+            crossSql = new CrossSql(appBaseDirectory);
         }
 
         public void Apply(string module, string template) {
@@ -239,7 +241,7 @@ namespace X2MANTools {
         }
 
         void TranformSql(string type, string folder, string source, string target) {
-            new CrossSql().Transform(Path.Combine(folder, source), Path.Combine(folder, target), type);
+            crossSql.Transform(Path.Combine(folder, source), Path.Combine(folder, target), type);
         }
 
         void Print(string type, string content) {
