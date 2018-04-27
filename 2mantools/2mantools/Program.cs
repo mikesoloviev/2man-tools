@@ -30,7 +30,7 @@ USAGE EXAMPLE:
             if (os.StartsWith("mac")) {
                 os = "macos";
             }
-            else if (osType.StartsWith("unix")) {
+            else if (os.StartsWith("unix")) {
                 os = "unix";
             }
             else {

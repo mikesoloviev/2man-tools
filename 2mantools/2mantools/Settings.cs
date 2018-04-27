@@ -48,7 +48,7 @@ namespace X2MANTools {
                 foreach (var rawLine in File.ReadAllLines(Path.Combine(appBaseDirectory, "settings.ini"))) {
                     var line = rawLine.Trim();
                     if (line.StartsWith("[")) {
-                        group = line.TrimStart("[").TrimEnd("]").Trim().ToLower();
+                        group = line.TrimStart('[').TrimEnd(']').Trim().ToLower();
                     }
                     else if (line.Contains("=") && (group == "any" || group == os)) {
                         var fields = line.Split('=');
