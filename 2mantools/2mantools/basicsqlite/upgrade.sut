@@ -1,2 +1,2 @@
-﻿(: print | Info | Installing MS SQL Database Library :)
-(: run | dotnet | add package Microsoft.EntityFrameworkCore.SqlServer :)
+﻿(: print | Info | Installing SQLite Database Library :)
+(: run | dotnet | add package Microsoft.EntityFrameworkCore.Sqlite :)
